@@ -20,7 +20,7 @@ class Spritesheet {
         let xPos = this.currentFrame % this.sheetX;
         let yPos = Math.floor(this.currentFrame / this.sheetX);
 
-        return new String(-this.frameWidth * xPos + "px " + -this.frameHeight * yPos + "px");
+        return `${-this.frameWidth * xPos}px ${-this.frameHeight * yPos}px`;
     }
 }
 
@@ -44,7 +44,7 @@ document.addEventListener("keydown", function(event) {
         drehscheibe.style.backgroundPosition = drehscheibeSheet.getFrameCoord(1);
     }
     else if (event.code === "KeyA") {
-        drehscheibeIsAnimating = !drehscheibeIsAnimating ? true : false;
+        drehscheibeIsAnimating = !drehscheibeIsAnimating;
     }
 });
 
