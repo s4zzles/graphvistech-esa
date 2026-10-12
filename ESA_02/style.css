@@ -1,0 +1,47 @@
+body {
+    background-color: rgb(192, 219, 209);
+    font-family: "Merriweather Sans";
+    margin: 0;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+canvas {
+    margin: 0rem;
+}
+
+h1 {
+    font-size: 2.2rem;
+    margin-top: 3rem;
+}
+
+
+#back {
+    margin: 3rem;
+}
+
+footer {
+    text-align: center;
+    font-size: 0.85rem;
+    color: rgba(0, 0, 0, 0.75);
+    margin-top: auto;
+    padding-top: 4rem;
+    padding-bottom: 2rem;
+}
+
+@media (max-width: 1200px) {
+
+    html {
+        font-size: 90%;
+    }
+
+    canvas {
+        height: 400px;
+        width: 400px;
+    }
+}
