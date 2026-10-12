@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="de">
     <head>
+        <style>
+        @import url('https://fonts.googleapis.com/css2?family=Merriweather+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+        </style>
         <meta charset="UTF-8">
         <link rel="stylesheet" href="style.css">
         <title>ESA01: Interaktiv animierte Scheibe</title>
@@ -8,15 +11,25 @@
     <body>
         <main>
             <h1>ESA01: Interaktiv animierte Scheibe</h1>
-            <div id="ds"></div>
-            <div id="pixelguy"></div>
-            <h2>Interaktionen:</h2>
-            <p>R / rechte Pfeiltaste: Die Drehscheibe dreht sich ein Stück im Uhrzeigersinn.</p>
-            <p>L / linke Pfeiltaste: Die Drehscheibe dreht sich ein Stück entgegen dem Uhrzeigersinn.</p>
-            <p>A: Die Drehscheibe dreht sich automatisch. Durch erneutes Drücken von A stoppt sie wieder.<br>
-                Während sich die Scheibe automatisch dreht, ist die manuelle Interaktion deaktiviert.
-            </p>
-            <a href="../index.html">Zurück zur Übersicht</a>
+            <div class="animation-container">
+                <div class="item" id="ds"></div>
+                <div class="item" id="pixelguy"></div>
+            </div>
+            <div class="text-container">
+                <h2>Interaktionen:</h2>
+                <p>R / rechte Pfeiltaste: Die Drehscheibe dreht sich ein Stück im Uhrzeigersinn.</p>
+                <p>L / linke Pfeiltaste: Die Drehscheibe dreht sich ein Stück entgegen dem Uhrzeigersinn.</p>
+                <p>A: Die Drehscheibe dreht sich automatisch. Durch erneutes Drücken von A stoppt sie wieder.<br>
+                    Während sich die Scheibe automatisch dreht, ist die manuelle Interaktion deaktiviert.
+                </p>
+                <h2>Quellen:</h2>
+                <p>Das verwendete Material ist von mir selbst angefertigt worden.</p>
+                <a href="../index.html">Zurück zur Übersicht</a>
+            </div>
+            <footer>
+                <p>Diese Seite ist im Zuge des VFH-Kurses "Graphical Visualisation Technologies" entstanden.</p>
+                <p>Erstellt von Philipp Becker</p>
+            </footer>
         </main>
         <script src="script.js"></script>
     </body>

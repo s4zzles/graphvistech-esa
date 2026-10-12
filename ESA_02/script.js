@@ -4,17 +4,17 @@ let canvas = document.getElementById('canvas');
 let gl = canvas.getContext('experimental-webgl');
 
 // Pipeline setup
-gl.clearColor(0.8, 1, 1, 1);
+gl.clearColor(1, 1, 0.8, 1);
 
 // Compile a vertex shader
 let vsSource = 'attribute vec2 pos;'+
-    'void main(){gl_Position = vec4(2.0 * pos - vec2(1), 0, 1);}';
+    'void main(){gl_Position = vec4(2.0 * pos - 1.0, 0, 1);}'; // to check!
 let vs = gl.createShader(gl.VERTEX_SHADER);
 gl.shaderSource(vs, vsSource);
 gl.compileShader(vs);
 
 // Compile a fragment shader
-let fsSource =  'void main() { gl_FragColor = vec4(0,0,1,1); }';
+let fsSource =  'void main() { gl_FragColor = vec4(0.75,0.5,0,1); }';
 let fs = gl.createShader(gl.FRAGMENT_SHADER);
 gl.shaderSource(fs, fsSource);
 gl.compileShader(fs);
@@ -37,7 +37,7 @@ let vertices = new Float32Array([
     0.315,0.385,
     0.329,0.313,
     0.295,0.291,
-    0.295,0.265, //Pfote 1 i=9
+    0.295,0.265, //i=9
     0.361,0.265,
     0.377,0.320,
     0.380,0.381,
@@ -47,7 +47,7 @@ let vertices = new Float32Array([
     0.765,0.355,
     0.770,0.311,
     0.740,0.293,
-    0.742,0.265, //Pfote 2 i=19
+    0.742,0.265, // i=19
     0.803,0.265,
     0.816,0.353,
     0.786,0.402,
@@ -131,7 +131,7 @@ gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
 
 // Bind vertex buffer to attribute variable
 let posAttrib = gl.getAttribLocation(prog, 'pos');
-gl.vertexAttribPointer(posAttrib, 2, gl.FLOAT, false, 0, 0);
+gl.vertexAttribPointer(posAttrib, 2, gl.FLOAT, false, 0, 0); // check parameters!
 gl.enableVertexAttribArray(posAttrib);
 
 
