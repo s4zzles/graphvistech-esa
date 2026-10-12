@@ -26,6 +26,10 @@ main {
     height: 380px;
 }
 
+#back {
+    margin: 2rem;
+}
+
 .item {
     margin: 1rem;
     zoom: 80%;
@@ -56,6 +60,6 @@ footer {
     }
 
     .item {
-        zoom: 60%;
+        zoom: 55%;
     }
 }
