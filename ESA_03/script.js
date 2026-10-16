@@ -4,7 +4,7 @@ let canvas = document.getElementById('canvas');
 let gl = canvas.getContext('experimental-webgl');
 
 // Pipeline setup
-gl.clearColor(1, 0.75, 0.9, 1);
+gl.clearColor(0.4, 0.25, 0.4, 1);
 
 // Compile a vertex shader
 let vsSource = 
@@ -31,72 +31,76 @@ gl.linkProgram(prog);
 gl.useProgram(prog);
 
 
-let orangeCol = new Float32Array([0.8,0.3,0,1]);
-let yellowCol = new Float32Array([1,1,0,1]);
-let greenCol = new Float32Array([0.1,0.6,0.2,1]);
+let orangeCol1 = new Float32Array([0.8,0.35,0.1,1]);
+let orangeCol2 = new Float32Array([0.95,0.5,0,1]);
+let orangeCol3 = new Float32Array([0.7,0.25,0.25,1]);
+let yellowCol1 = new Float32Array([0.95,0.5,0,1]);
+let yellowCol2 = new Float32Array([1,1,0,1]);
+let greenCol1 = new Float32Array([0.1,0.6,0.2,1]);
+let greenCol2 = new Float32Array([0.3,0.8,0.3,1]);
 // Load vertex data (pos,col) into buffer (array of structure)
 let vertices = new Float32Array([
-    0.508,0.047, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3],
-    0.675,0.057, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3],
-    0.828,0.117, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3],
-    0.922,0.214, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3],
-    0.947,0.402, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3],
-    0.874,0.577, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3],
-    0.741,0.690, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3],
-    0.600,0.745, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3],
-    0.560,0.697, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3],
-    0.475,0.695, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3], // i=9
-    0.415,0.745, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3],
-    0.260,0.687, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3],
-    0.143,0.576, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3],
-    0.069,0.387, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3],
-    0.088,0.233, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3],
-    0.185,0.126, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3],
-    0.341,0.057, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3],
-    0.598,0.117, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3],
-    0.598,0.117, yellowCol[0],yellowCol[1],yellowCol[2],yellowCol[3],
-    0.733,0.238, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3], // i=19
-    0.733,0.238, yellowCol[0],yellowCol[1],yellowCol[2],yellowCol[3],
-    0.626,0.230, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3],
-    0.626,0.230, yellowCol[0],yellowCol[1],yellowCol[2],yellowCol[3],
-    0.572,0.174, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3],
-    0.572,0.174, yellowCol[0],yellowCol[1],yellowCol[2],yellowCol[3],
-    0.512,0.219, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3],
-    0.512,0.219, yellowCol[0],yellowCol[1],yellowCol[2],yellowCol[3],
-    0.397,0.223, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3],
-    0.397,0.223, yellowCol[0],yellowCol[1],yellowCol[2],yellowCol[3],
-    0.257,0.259, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3], // i=29
-    0.257,0.259, yellowCol[0],yellowCol[1],yellowCol[2],yellowCol[3],
-    0.408,0.118, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3],
-    0.408,0.118, yellowCol[0],yellowCol[1],yellowCol[2],yellowCol[3],
-    0.463,0.294, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3],
-    0.463,0.294, yellowCol[0],yellowCol[1],yellowCol[2],yellowCol[3],
-    0.561,0.295, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3],
-    0.561,0.295, yellowCol[0],yellowCol[1],yellowCol[2],yellowCol[3],
-    0.508,0.405, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3],
-    0.508,0.405, yellowCol[0],yellowCol[1],yellowCol[2],yellowCol[3],
-    0.593,0.390, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3], // i=39
-    0.593,0.390, 1,0.5,0,1,
-    0.782,0.410, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3],
-    0.782,0.410, yellowCol[0],yellowCol[1],yellowCol[2],yellowCol[3],
-    0.676,0.539, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3],
-    0.676,0.539, yellowCol[0],yellowCol[1],yellowCol[2],yellowCol[3],
-    0.253,0.421, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3],
-    0.253,0.421, yellowCol[0],yellowCol[1],yellowCol[2],yellowCol[3],
-    0.431,0.398, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3],
-    0.431,0.398, 1,0.5,0,1,
-    0.364,0.545, orangeCol[0],orangeCol[1],orangeCol[2],orangeCol[3], // i=49
-    0.364,0.545, yellowCol[0],yellowCol[1],yellowCol[2],yellowCol[3],
-    0.415,0.745, greenCol[0],greenCol[1],greenCol[2],greenCol[3],
-    0.475,0.695, greenCol[0],greenCol[1],greenCol[2],greenCol[3],
-    0.560,0.697, greenCol[0],greenCol[1],greenCol[2],greenCol[3],
-    0.600,0.745, greenCol[0],greenCol[1],greenCol[2],greenCol[3],
-    0.447,0.801, greenCol[0],greenCol[1],greenCol[2],greenCol[3],
-    0.574,0.850, greenCol[0],greenCol[1],greenCol[2],greenCol[3],
-    0.411,0.882, greenCol[0],greenCol[1],greenCol[2],greenCol[3],
-    0.476,0.928, greenCol[0],greenCol[1],greenCol[2],greenCol[3],
-    0.353,0.924, greenCol[0],greenCol[1],greenCol[2],greenCol[3], // i=59
-    0.409,0.965, greenCol[0],greenCol[1],greenCol[2],greenCol[3]
+    0.508,0.047, orangeCol3[0],orangeCol3[1],orangeCol3[2],orangeCol3[3],
+    0.675,0.057, orangeCol3[0],orangeCol3[1],orangeCol3[2],orangeCol3[3],
+    0.828,0.117, orangeCol3[0],orangeCol3[1],orangeCol3[2],orangeCol3[3],
+    0.922,0.214, orangeCol3[0],orangeCol3[1],orangeCol3[2],orangeCol3[3],
+    0.947,0.402, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
+    0.874,0.577, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
+    0.741,0.690, orangeCol2[0],orangeCol2[1],orangeCol2[2],orangeCol2[3],
+    0.600,0.745, orangeCol2[0],orangeCol2[1],orangeCol2[2],orangeCol2[3],
+    0.560,0.697, orangeCol2[0],orangeCol2[1],orangeCol2[2],orangeCol2[3],
+    0.475,0.695, orangeCol2[0],orangeCol2[1],orangeCol2[2],orangeCol2[3], // i=9
+    0.415,0.745, orangeCol2[0],orangeCol2[1],orangeCol2[2],orangeCol2[3],
+    0.260,0.687, orangeCol2[0],orangeCol2[1],orangeCol2[2],orangeCol2[3],
+    0.143,0.576, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
+    0.069,0.387, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
+    0.088,0.233, orangeCol3[0],orangeCol3[1],orangeCol3[2],orangeCol3[3],
+    0.185,0.126, orangeCol3[0],orangeCol3[1],orangeCol3[2],orangeCol3[3],
+    0.341,0.057, orangeCol3[0],orangeCol3[1],orangeCol3[2],orangeCol3[3],
+    0.598,0.117, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
+    0.598,0.117, yellowCol1[0],yellowCol1[1],yellowCol1[2],yellowCol1[3],
+    0.733,0.238, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3], // i=19
+    0.733,0.238, yellowCol1[0],yellowCol1[1],yellowCol1[2],yellowCol1[3],
+    0.626,0.230, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
+    0.626,0.230, yellowCol2[0],yellowCol2[1],yellowCol2[2],yellowCol2[3],
+    0.572,0.174, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
+    0.572,0.174, yellowCol2[0],yellowCol2[1],yellowCol2[2],yellowCol2[3],
+    0.512,0.219, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
+    0.512,0.219, yellowCol2[0],yellowCol2[1],yellowCol2[2],yellowCol2[3],
+    0.397,0.223, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
+    0.397,0.223, yellowCol2[0],yellowCol2[1],yellowCol2[2],yellowCol2[3],
+    0.257,0.259, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3], // i=29
+    0.257,0.259, yellowCol1[0],yellowCol1[1],yellowCol1[2],yellowCol1[3],
+    0.408,0.118, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
+    0.408,0.118, yellowCol1[0],yellowCol1[1],yellowCol1[2],yellowCol1[3],
+    0.463,0.294, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
+    0.463,0.294, yellowCol2[0],yellowCol2[1],yellowCol2[2],yellowCol2[3],
+    0.561,0.295, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
+    0.561,0.295, yellowCol2[0],yellowCol2[1],yellowCol2[2],yellowCol2[3],
+    0.508,0.405, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
+    0.508,0.405, yellowCol2[0],yellowCol2[1],yellowCol2[2],yellowCol2[3],
+    0.593,0.390, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3], // i=39
+    0.593,0.390, yellowCol2[0],yellowCol2[1],yellowCol2[2],yellowCol2[3],
+    0.782,0.410, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
+    0.782,0.410, yellowCol1[0],yellowCol1[1],yellowCol1[2],yellowCol1[3],
+    0.676,0.539, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
+    0.676,0.539, yellowCol1[0],yellowCol1[1],yellowCol1[2],yellowCol1[3],
+    0.253,0.421, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
+    0.253,0.421, yellowCol1[0],yellowCol1[1],yellowCol1[2],yellowCol1[3],
+    0.431,0.398, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
+    0.431,0.398, yellowCol2[0],yellowCol2[1],yellowCol2[2],yellowCol2[3],
+    0.364,0.545, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3], // i=49
+    0.364,0.545, yellowCol1[0],yellowCol1[1],yellowCol1[2],yellowCol1[3],
+    0.415,0.745, greenCol1[0],greenCol1[1],greenCol1[2],greenCol1[3],
+    0.475,0.695, greenCol1[0],greenCol1[1],greenCol1[2],greenCol1[3],
+    0.560,0.697, greenCol1[0],greenCol1[1],greenCol1[2],greenCol1[3],
+    0.600,0.745, greenCol1[0],greenCol1[1],greenCol1[2],greenCol1[3],
+    0.447,0.801, greenCol1[0],greenCol1[1],greenCol1[2],greenCol1[3],
+    0.574,0.850, greenCol1[0],greenCol1[1],greenCol1[2],greenCol1[3],
+    0.411,0.882, greenCol2[0],greenCol2[1],greenCol2[2],greenCol2[3],
+    0.476,0.928, greenCol2[0],greenCol2[1],greenCol2[2],greenCol2[3],
+    0.353,0.924, greenCol2[0],greenCol2[1],greenCol2[2],greenCol2[3], // i=59
+    0.409,0.965, greenCol2[0],greenCol2[1],greenCol2[2],greenCol2[3]
 ]);
 
 let indices = new Uint16Array([
