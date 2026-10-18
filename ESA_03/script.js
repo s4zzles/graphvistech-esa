@@ -180,6 +180,11 @@ gl.vertexAttribPointer(colAttrib, 4, gl.FLOAT, false, 24, 8);
 gl.enableVertexAttribArray(colAttrib);
 
 
+//backface culling
+gl.frontFace(gl.CCW);
+gl.enable(gl.CULL_FACE);
+gl.cullFace(gl.BACK);
+
 // Clear canvas and draw call
 gl.clear(gl.COLOR_BUFFER_BIT);
 
