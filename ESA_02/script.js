@@ -3,30 +3,30 @@
 let canvas = document.getElementById('canvas');
 let gl = canvas.getContext('experimental-webgl');
 
-// Pipeline setup
+// Background Color
 gl.clearColor(1, 1, 0.8, 1);
 
-// Compile a vertex shader
+// vertex shader
 let vsSource = 'attribute vec2 pos;'+
-    'void main(){gl_Position = vec4(2.0 * pos - 1.0, 0, 1);}'; // to check!
+    'void main(){gl_Position = vec4(2.0 * pos - 1.0, 0, 1);}';
 let vs = gl.createShader(gl.VERTEX_SHADER);
 gl.shaderSource(vs, vsSource);
 gl.compileShader(vs);
 
-// Compile a fragment shader
+// fragment shader
 let fsSource =  'void main() { gl_FragColor = vec4(0.75,0.5,0,1); }';
 let fs = gl.createShader(gl.FRAGMENT_SHADER);
 gl.shaderSource(fs, fsSource);
 gl.compileShader(fs);
 
-// Link together into a program
+
 let prog = gl.createProgram();
 gl.attachShader(prog, vs);
 gl.attachShader(prog, fs);
 gl.linkProgram(prog);
 gl.useProgram(prog);
 
-// Load vertex data into a buffer
+// vertex data
 let vertices = new Float32Array([
     0.213,0.567,
     0.211,0.563,
@@ -94,6 +94,7 @@ let vertices = new Float32Array([
     0.055,0.702 // Ende Nase
 ]);
 
+// define index arrays
 let outlineIndices = new Uint16Array(49);
 for(let i = 0; i <= 48; i++) {
     outlineIndices[i] = i;
@@ -123,7 +124,7 @@ let collar2Indices = new Uint16Array([
     3, 55, 56, 34
 ]);
 
-
+// create vbo for vertex data array
 let vbo = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
 gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
@@ -131,11 +132,11 @@ gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
 
 // Bind vertex buffer to attribute variable
 let posAttrib = gl.getAttribLocation(prog, 'pos');
-gl.vertexAttribPointer(posAttrib, 2, gl.FLOAT, false, 0, 0); // check parameters!
+gl.vertexAttribPointer(posAttrib, 2, gl.FLOAT, false, 0, 0);
 gl.enableVertexAttribArray(posAttrib);
 
 
-// Clear canvas and draw calls
+// Clear canvas and draw calls (ibo for every index array)
 gl.clear(gl.COLOR_BUFFER_BIT);
 
 let iboOutline = gl.createBuffer();
@@ -152,7 +153,6 @@ gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, eyeIndices,
     gl.STATIC_DRAW);
 
 gl.drawElements(gl.LINE_LOOP, eyeIndices.length, gl.UNSIGNED_SHORT, 0);
-
 
 let iboNose = gl.createBuffer();
 gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboNose);

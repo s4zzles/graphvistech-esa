@@ -3,27 +3,26 @@
 let canvas = document.getElementById('canvas');
 let gl = canvas.getContext('experimental-webgl');
 
-// Pipeline setup
+// Background  color
 gl.clearColor(0.4, 0.25, 0.4, 1);
 
-// Compile a vertex shader
+// vertex shader
 let vsSource = 
                 'attribute vec2 pos;' +
                 'attribute vec4 col;' +
                 'varying vec4 color;' +
-    'void main(){color = col; gl_Position = vec4(2.0 * pos - 1.0, 0, 1);}'; // to check!
+    'void main(){color = col; gl_Position = vec4(2.0 * pos - 1.0, 0, 1);}';
 let vs = gl.createShader(gl.VERTEX_SHADER);
 gl.shaderSource(vs, vsSource);
 gl.compileShader(vs);
 
-// Compile a fragment shader
+// fragment shader
 let fsSource =  'precision mediump float;' + 
                 'varying vec4 color;' + 'void main() { gl_FragColor = color; }';
 let fs = gl.createShader(gl.FRAGMENT_SHADER);
 gl.shaderSource(fs, fsSource);
 gl.compileShader(fs);
 
-// Link together into a program
 let prog = gl.createProgram();
 gl.attachShader(prog, vs);
 gl.attachShader(prog, fs);
@@ -31,6 +30,7 @@ gl.linkProgram(prog);
 gl.useProgram(prog);
 
 
+// vertex color variables
 let orangeCol1 = new Float32Array([0.8,0.35,0.1,1]);
 let orangeCol2 = new Float32Array([0.95,0.5,0,1]);
 let orangeCol3 = new Float32Array([0.7,0.25,0.25,1]);
@@ -143,7 +143,7 @@ let indices = new Uint16Array([
     14,15,29,
     15,31,29,
     15,16,31,
-    16,0,31, // orange tris
+    16,0,31, // end of orange tris
     30,32,28,
     28,32,26,
     32,24,26,
@@ -152,7 +152,7 @@ let indices = new Uint16Array([
     18,20,22,
     34,36,38,
     40,42,44,
-    46,48,50, // yellow tris
+    46,48,50, // end of yellow tris
     51,52,55,
     52,53,55,
     53,54,56,
@@ -160,7 +160,7 @@ let indices = new Uint16Array([
     55,56,57,
     57,56,58,
     57,58,60,
-    59,57,60 // green tris
+    59,57,60 // end of green tris
 ]);
 
 
@@ -180,7 +180,7 @@ gl.vertexAttribPointer(colAttrib, 4, gl.FLOAT, false, 24, 8);
 gl.enableVertexAttribArray(colAttrib);
 
 
-// Clear canvas and draw calls
+// Clear canvas and draw call
 gl.clear(gl.COLOR_BUFFER_BIT);
 
 let ibo = gl.createBuffer();
