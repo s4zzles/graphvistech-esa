@@ -5,24 +5,23 @@ let canvas02 = document.getElementById('canvas02');
 let canvas03 = document.getElementById('canvas03');
 
 
-drawOnCanvas(canvas01);
-drawOnCanvas(canvas02);
-drawOnCanvas(canvas03);
+drawOnCanvas(canvas01, "DINI");
+//drawOnCanvas(canvas02, "HORN");
+//drawOnCanvas(canvas03), "CUSTOM";
 
 function drawOnCanvas(canvas, mode) {
     let gl = canvas.getContext('experimental-webgl');
 
-    const Mode = mode;
     
     // Background  color
     gl.clearColor(0.7, 0.7, 0.8, 1);
 
     // vertex shader
     let vsSource = 
-                    'attribute vec2 pos;' +
+                    'attribute vec3 pos;' +
                     'attribute vec4 col;' +
                     'varying vec4 color;' +
-        'void main(){color = col; gl_Position = vec4(2.0 * pos - 1.0, 0, 1);}';
+        'void main(){color = col; gl_Position = vec4(2.0 * pos, 1);}';
     let vs = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vs, vsSource);
     gl.compileShader(vs);
@@ -40,141 +39,19 @@ function drawOnCanvas(canvas, mode) {
     gl.linkProgram(prog);
     gl.useProgram(prog);
 
-
-    // vertex color variables
-    let orangeCol1 = new Float32Array([0.8,0.35,0.1,1]);
-    let orangeCol2 = new Float32Array([0.95,0.5,0,1]);
-    let orangeCol3 = new Float32Array([0.7,0.25,0.25,1]);
-    let yellowCol1 = new Float32Array([0.95,0.5,0,1]);
-    let yellowCol2 = new Float32Array([1,1,0,1]);
-    let greenCol1 = new Float32Array([0.1,0.6,0.2,1]);
-    let greenCol2 = new Float32Array([0.3,0.8,0.3,1]);
-    // Load vertex data (pos,col) into buffer (array of structure)
-    let vertices = new Float32Array([
-        0.508,0.047, orangeCol3[0],orangeCol3[1],orangeCol3[2],orangeCol3[3],
-        0.675,0.057, orangeCol3[0],orangeCol3[1],orangeCol3[2],orangeCol3[3],
-        0.828,0.117, orangeCol3[0],orangeCol3[1],orangeCol3[2],orangeCol3[3],
-        0.922,0.214, orangeCol3[0],orangeCol3[1],orangeCol3[2],orangeCol3[3],
-        0.947,0.402, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
-        0.874,0.577, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
-        0.741,0.690, orangeCol2[0],orangeCol2[1],orangeCol2[2],orangeCol2[3],
-        0.600,0.745, orangeCol2[0],orangeCol2[1],orangeCol2[2],orangeCol2[3],
-        0.560,0.697, orangeCol2[0],orangeCol2[1],orangeCol2[2],orangeCol2[3],
-        0.475,0.695, orangeCol2[0],orangeCol2[1],orangeCol2[2],orangeCol2[3], // i=9
-        0.415,0.745, orangeCol2[0],orangeCol2[1],orangeCol2[2],orangeCol2[3],
-        0.260,0.687, orangeCol2[0],orangeCol2[1],orangeCol2[2],orangeCol2[3],
-        0.143,0.576, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
-        0.069,0.387, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
-        0.088,0.233, orangeCol3[0],orangeCol3[1],orangeCol3[2],orangeCol3[3],
-        0.185,0.126, orangeCol3[0],orangeCol3[1],orangeCol3[2],orangeCol3[3],
-        0.341,0.057, orangeCol3[0],orangeCol3[1],orangeCol3[2],orangeCol3[3],
-        0.598,0.117, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
-        0.598,0.117, yellowCol1[0],yellowCol1[1],yellowCol1[2],yellowCol1[3],
-        0.733,0.238, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3], // i=19
-        0.733,0.238, yellowCol1[0],yellowCol1[1],yellowCol1[2],yellowCol1[3],
-        0.626,0.230, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
-        0.626,0.230, yellowCol2[0],yellowCol2[1],yellowCol2[2],yellowCol2[3],
-        0.572,0.174, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
-        0.572,0.174, yellowCol2[0],yellowCol2[1],yellowCol2[2],yellowCol2[3],
-        0.512,0.219, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
-        0.512,0.219, yellowCol2[0],yellowCol2[1],yellowCol2[2],yellowCol2[3],
-        0.397,0.223, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
-        0.397,0.223, yellowCol2[0],yellowCol2[1],yellowCol2[2],yellowCol2[3],
-        0.257,0.259, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3], // i=29
-        0.257,0.259, yellowCol1[0],yellowCol1[1],yellowCol1[2],yellowCol1[3],
-        0.408,0.118, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
-        0.408,0.118, yellowCol1[0],yellowCol1[1],yellowCol1[2],yellowCol1[3],
-        0.463,0.294, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
-        0.463,0.294, yellowCol2[0],yellowCol2[1],yellowCol2[2],yellowCol2[3],
-        0.561,0.295, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
-        0.561,0.295, yellowCol2[0],yellowCol2[1],yellowCol2[2],yellowCol2[3],
-        0.508,0.405, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
-        0.508,0.405, yellowCol2[0],yellowCol2[1],yellowCol2[2],yellowCol2[3],
-        0.593,0.390, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3], // i=39
-        0.593,0.390, yellowCol2[0],yellowCol2[1],yellowCol2[2],yellowCol2[3],
-        0.782,0.410, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
-        0.782,0.410, yellowCol1[0],yellowCol1[1],yellowCol1[2],yellowCol1[3],
-        0.676,0.539, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
-        0.676,0.539, yellowCol1[0],yellowCol1[1],yellowCol1[2],yellowCol1[3],
-        0.253,0.421, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
-        0.253,0.421, yellowCol1[0],yellowCol1[1],yellowCol1[2],yellowCol1[3],
-        0.431,0.398, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3],
-        0.431,0.398, yellowCol2[0],yellowCol2[1],yellowCol2[2],yellowCol2[3],
-        0.364,0.545, orangeCol1[0],orangeCol1[1],orangeCol1[2],orangeCol1[3], // i=49
-        0.364,0.545, yellowCol1[0],yellowCol1[1],yellowCol1[2],yellowCol1[3],
-        0.415,0.745, greenCol1[0],greenCol1[1],greenCol1[2],greenCol1[3],
-        0.475,0.695, greenCol1[0],greenCol1[1],greenCol1[2],greenCol1[3],
-        0.560,0.697, greenCol1[0],greenCol1[1],greenCol1[2],greenCol1[3],
-        0.600,0.745, greenCol1[0],greenCol1[1],greenCol1[2],greenCol1[3],
-        0.447,0.801, greenCol1[0],greenCol1[1],greenCol1[2],greenCol1[3],
-        0.574,0.850, greenCol1[0],greenCol1[1],greenCol1[2],greenCol1[3],
-        0.411,0.882, greenCol2[0],greenCol2[1],greenCol2[2],greenCol2[3],
-        0.476,0.928, greenCol2[0],greenCol2[1],greenCol2[2],greenCol2[3],
-        0.353,0.924, greenCol2[0],greenCol2[1],greenCol2[2],greenCol2[3], // i=59
-        0.409,0.965, greenCol2[0],greenCol2[1],greenCol2[2],greenCol2[3]
-    ]);
-
-    let indices = new Uint16Array([
-        0,1,17,
-        1,2,17,
-        17,2,19,
-        0,17,31,
-        2,3,19,
-        19,3,4,
-        19,4,41,
-        41,4,5,
-        41,5,43,
-        43,5,6,
-        43,6,7,
-        43,7,8,
-        39,43,8,
-        39,19,41,
-        39,35,19,
-        21,19,35,
-        25,21,35,
-        25,23,21,
-        25,35,33,
-        35,39,37,
-        33,37,47,
-        27,25,33,
-        29,27,33,
-        29,33,47,
-        29,47,45,
-        37,39,8,
-        37,8,9,
-        47,37,9,
-        49,47,9,
-        49,9,10,
-        11,49,10,
-        12,49,11,
-        12,45,49,
-        13,45,12,
-        13,29,45,
-        14,29,13,
-        14,15,29,
-        15,31,29,
-        15,16,31,
-        16,0,31, // end of orange tris
-        30,32,28,
-        28,32,26,
-        32,24,26,
-        32,18,24,
-        18,22,24,
-        18,20,22,
-        34,36,38,
-        40,42,44,
-        46,48,50, // end of yellow tris
-        51,52,55,
-        52,53,55,
-        53,54,56,
-        53,56,55,
-        55,56,57,
-        57,56,58,
-        57,58,60,
-        59,57,60 // end of green tris
-    ]);
+    let vertices, indicesLines, indicesTris;
 
 
+    switch (mode) {
+        case "DINI":
+           ({ vertices, indicesLines, indicesTris } = createVertexDataDini(vertices, indicesLines, indicesTris));
+            console.log("test");
+            break;
+        case "HORN":
+            ({ vertices, indicesLines, indicesTris } = createVertexDataHorn(vertices, indicesLines, indicesTris));
+            console.log("test2");
+            break;
+    }
 
     let vbo = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
@@ -183,26 +60,172 @@ function drawOnCanvas(canvas, mode) {
 
     // Bind vertex buffer to attribute variable
     let posAttrib = gl.getAttribLocation(prog, 'pos');
-    gl.vertexAttribPointer(posAttrib, 2, gl.FLOAT, false, 24, 0);
+    gl.vertexAttribPointer(posAttrib, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(posAttrib);
 
     let colAttrib = gl.getAttribLocation(prog, 'col');
-    gl.vertexAttribPointer(colAttrib, 4, gl.FLOAT, false, 24, 8);
-    gl.enableVertexAttribArray(colAttrib);
 
-
-    //backface culling
-    gl.frontFace(gl.CCW);
-    gl.enable(gl.CULL_FACE);
-    gl.cullFace(gl.BACK);
 
     // Clear canvas and draw call
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    let ibo = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices,
+    gl.vertexAttrib4f(colAttrib, 1, 0, 1, 1);
+    let iboTris = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboTris);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indicesTris,
         gl.STATIC_DRAW);
 
-    gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.TRIANGLES, indicesTris.length, gl.UNSIGNED_SHORT, 0);
+
+    gl.vertexAttrib4f(colAttrib, 0, 0, 0.5, 1);
+    let iboLines = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboLines);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indicesLines,
+        gl.STATIC_DRAW);
+
+    gl.drawElements(gl.LINES, indicesLines.length, gl.UNSIGNED_SHORT, 0);
+}
+
+function createVertexDataDini(vertices, indicesLines, indicesTris){
+    let n = 32;
+    let m = 12;
+    // Positions.
+    vertices = new Float32Array(3*(n+1)*(m+1));
+    // Index data for Line.
+    indicesLines = new Uint16Array(2 * 2 * n * m);
+    indicesTris = new Uint16Array(3 * 2 * m * n);
+
+    let dt = 4*Math.PI/n;
+    let dr = 1/m;
+    // Counter for entries in index array.
+    let iIndexLines = 0;
+    let iIndexTris = 0;
+
+    const a = 0.3;
+    const b = 0.5;
+
+    // Loop angle t.
+    for(let i=0, t= 0; i <= n; i++, t += dt) {
+
+        // Loop radius r.
+        for(let j=0, r=0.01; j <= m; j++, r += dr){
+
+            let iVertex = i*(m+1) + j;
+
+            // Dini surface (side) t >= 0.01!!
+            let x = (a * Math.cos(t) * Math.sin(r));
+            let y = (a * (Math.cos(r) + Math.log(Math.tan(r / 2))) + b * t) / 10;
+            let z =( a * Math.sin(t) * Math.sin(r));
+
+            // Set vertex positions.
+            vertices[iVertex * 3] = x;
+            vertices[iVertex * 3 + 1] = y;
+            vertices[iVertex * 3 + 2] = z;
+
+            // Set index.
+            // Line on beam.
+            if(j>0 && i>0){
+                indicesLines[iIndexLines++] = iVertex - 1;
+                indicesLines[iIndexLines++] = iVertex;
+            }
+
+            // Line on ring.
+            if(j>0 && i>0){
+                indicesLines[iIndexLines++] = iVertex-(m+1);
+                indicesLines[iIndexLines++] = iVertex;
+            }
+
+            // 2 Tris
+            if(j>0 && i>0) {
+                indicesTris[iIndexTris++] = iVertex;
+                indicesTris[iIndexTris++] = iVertex - 1;
+                indicesTris[iIndexTris++] = iVertex - (m + 1);
+
+                indicesTris[iIndexTris++] = iVertex - 1;
+                indicesTris[iIndexTris++] = iVertex - 1 - (m + 1);
+                indicesTris[iIndexTris++] = iVertex - (m + 1);
+
+            }
+        }
+    }
+    return {
+        vertices, 
+        indicesLines, 
+        indicesTris
+    };
+}
+
+function createVertexDataHorn(vertices, indicesLines, indicesTris){
+    let n = 64;
+    let m = 24;
+    // Positions.
+    vertices = new Float32Array(3*(n+1)*(m+1));
+    // Index data for Line.
+    indicesLines = new Uint16Array(2 * 2 * n * m);
+    indicesTris = new Uint16Array(3 * 2 * m * n);
+
+    let dt = 2*Math.PI/n;
+    let dr = 1/m;
+    // Counter for entries in index array.
+    let iIndexLines = 0;
+    let iIndexTris = 0;
+
+    const a = 2;
+    const b = 2.5;
+    const c = 1.6;
+
+    // Loop angle t.
+    for(let i=0, t= -Math.PI; i <= n; i++, t += dt) {
+
+        // Loop radius r.
+        for(let j=0, r=0; j <= m; j++, r += dr){
+
+            let iVertex = i*(m+1) + j;
+
+            // Funnel -> basis für eigenkreation oder so
+            // let x = r * Math.cos(t);
+            // let y = Math.log(r) / 2 + 0.5;
+            // let z = r * Math.sin(t);
+
+            // horn top a,b,c consts
+            let x = (a + r * Math.cos(t)) * Math.sin(b * Math.PI * r);
+            let y = (a + r * Math.cos(t)) * Math.cos(b * Math.PI * r) + c * r;
+            let z = r * Math.sin(t);
+
+            // horn side
+            // let x = (a + r * Math.cos(t)) * Math.sin(b * Math.PI * r);
+            // let y = r * Math.sin(t);
+            // let z = (a + r * Math.cos(t)) * Math.cos(b * Math.PI * r) + c * r;
+
+            // Set vertex positions.
+            vertices[iVertex * 3] = x;
+            vertices[iVertex * 3 + 1] = y;
+            vertices[iVertex * 3 + 2] = z;
+
+            // Set index.
+            // Line on beam.
+            if(j>0 && i>0){
+                indicesLines[iIndexLines++] = iVertex - 1;
+                indicesLines[iIndexLines++] = iVertex;
+            }
+
+            // Line on ring.
+            if(j>0 && i>0){
+                indicesLines[iIndexLines++] = iVertex-(m+1);
+                indicesLines[iIndexLines++] = iVertex;
+            }
+
+            // 2 Tris
+            if(j>0 && i>0) {
+                indicesTris[iIndexTris++] = iVertex;
+                indicesTris[iIndexTris++] = iVertex - 1;
+                indicesTris[iIndexTris++] = iVertex - (m + 1);
+
+                indicesTris[iIndexTris++] = iVertex - 1;
+                indicesTris[iIndexTris++] = iVertex - 1 - (m + 1);
+                indicesTris[iIndexTris++] = iVertex - (m + 1);
+
+            }
+        }
+    }
 }
