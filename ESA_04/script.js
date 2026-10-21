@@ -7,7 +7,7 @@ let canvas03 = document.getElementById('canvas03');
 
 drawOnCanvas(canvas01, "DINI");
 drawOnCanvas(canvas02, "HORN");
-drawOnCanvas(canvas03, "DINI");
+drawOnCanvas(canvas03, "CUSTOM");
 
 function drawOnCanvas(canvas, mode) {
     let gl = canvas.getContext('experimental-webgl');
@@ -57,6 +57,8 @@ function drawOnCanvas(canvas, mode) {
         case "HORN":
             ({ vertices, indicesLines, indicesTris } = createVertexDataHorn(vertices, indicesLines, indicesTris));
             break;
+        case "CUSTOM":
+            ({ vertices, indicesLines, indicesTris } = createVertexDataCustom(vertices, indicesLines, indicesTris));
     }
 
     let vbo = gl.createBuffer();
@@ -66,16 +68,17 @@ function drawOnCanvas(canvas, mode) {
 
     // Bind vertex buffer to attribute variable
     let posAttrib = gl.getAttribLocation(prog, 'pos');
-    gl.vertexAttribPointer(posAttrib, 3, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(posAttrib, 3, gl.FLOAT, false, 28, 0);
     gl.enableVertexAttribArray(posAttrib);
 
     let colAttrib = gl.getAttribLocation(prog, 'col');
+    gl.vertexAttribPointer(colAttrib, 4, gl.FLOAT, false, 28, 12);
+    gl.enableVertexAttribArray(colAttrib);
 
 
     // Clear canvas and draw call
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    gl.vertexAttrib4f(colAttrib, 1, 0, 1, 1);
     let iboTris = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboTris);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indicesTris,
@@ -83,6 +86,7 @@ function drawOnCanvas(canvas, mode) {
 
     gl.drawElements(gl.TRIANGLES, indicesTris.length, gl.UNSIGNED_SHORT, 0);
 
+    gl.disableVertexAttribArray(colAttrib);
     gl.vertexAttrib4f(colAttrib, 0, 0, 0.5, 1);
     let iboLines = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboLines);
@@ -96,25 +100,25 @@ function createVertexDataDini(vertices, indicesLines, indicesTris){
     let n = 24;
     let m = 12;
     // Positions.
-    vertices = new Float32Array(3*(n+1)*(m+1));
+    vertices = new Float32Array((3 + 4) * (n + 1) * (m + 1));
     // Index data for Line.
     indicesLines = new Uint16Array((2 * 2 * n * m) + 2 * m);
     indicesTris = new Uint16Array(3 * 2 * m * n);
 
-    let dt = 4*Math.PI/n;
-    let dr = 1/m;
+    let dt = 4 * Math.PI / n;
+    let dr = 1 / m;
     // Counter for entries in index array.
     let iIndexLines = 0;
     let iIndexTris = 0;
 
-    const a = 0.9;
-    const b = 0.3;
+    const a = 0.9; // xz size
+    const b = 0.3; // y size
 
     // Loop angle t.
-    for(let i=0, t= 0; i <= n; i++, t += dt) {
+    for(let i = 0, t = 0; i <= n; i++, t += dt) {
 
         // Loop radius r.
-        for(let j=0, r=0.01; j <= m; j++, r += dr){
+        for(let j = 0, r = 0.01; j <= m; j++, r += dr){
 
             let iVertex = i*(m+1) + j;
 
@@ -124,11 +128,15 @@ function createVertexDataDini(vertices, indicesLines, indicesTris){
             let z =( a * Math.sin(t) * Math.sin(r));
 
             // Set vertex positions.
-            vertices[iVertex * 3] = x;
-            vertices[iVertex * 3 + 1] = y;
-            vertices[iVertex * 3 + 2] = z;
+            vertices[iVertex * 7] = x;
+            vertices[iVertex * 7 + 1] = y;
+            vertices[iVertex * 7 + 2] = z;
 
-            // set vertex colors TODO!!
+            // set vertex colors
+            vertices[iVertex * 7 + 3] = i / n;
+            vertices[iVertex * 7 + 4] = j / m;
+            vertices[iVertex * 7 + 5] = 1 - (j / m);
+            vertices[iVertex * 7 + 6] = 1;
 
             // Set index.
             // Line on beam.
@@ -163,17 +171,17 @@ function createVertexDataDini(vertices, indicesLines, indicesTris){
     };
 }
 
-function createVertexDataHorn(vertices, indicesLines, indicesTris){
-    let n = 32;
-    let m = 24;
+function createVertexDataHorn(vertices, indicesLines, indicesTris) {
+    let n = 16; // ring verts
+    let m = 24; // bow verts
     // Positions.
-    vertices = new Float32Array(3*(n+1)*(m+1));
+    vertices = new Float32Array((3 + 4) * (n + 1) * (m + 1));
     // Index data for Line.
     indicesLines = new Uint16Array(2 * 2 * n * m);
     indicesTris = new Uint16Array(3 * 2 * m * n);
 
-    let dt = 2*Math.PI/n;
-    let dr = 1/m;
+    let dt = 2 * Math.PI / n;
+    let dr = 1 / m;
     // Counter for entries in index array.
     let iIndexLines = 0;
     let iIndexTris = 0;
@@ -183,12 +191,12 @@ function createVertexDataHorn(vertices, indicesLines, indicesTris){
     const c = 1.5;
 
     // Loop angle t.
-    for(let i=0, t= -Math.PI; i <= n; i++, t += dt) {
+    for(let i = 0, t = -Math.PI; i <= n; i++, t += dt) {
 
         // Loop radius r.
-        for(let j=0, r=0; j <= m; j++, r += dr){
+        for(let j = 0, r = 0; j <= m; j++, r += dr) {
 
-            let iVertex = i*(m+1) + j;
+            let iVertex = i * (m + 1) + j;
 
             // horn top a,b,c consts
             let x = (a + r * Math.cos(t)) * Math.sin(b * Math.PI * r) / 3.5;
@@ -196,9 +204,15 @@ function createVertexDataHorn(vertices, indicesLines, indicesTris){
             let z = r * Math.sin(t);
 
             // Set vertex positions.
-            vertices[iVertex * 3] = x;
-            vertices[iVertex * 3 + 1] = y;
-            vertices[iVertex * 3 + 2] = z;
+            vertices[iVertex * 7] = x;
+            vertices[iVertex * 7 + 1] = y;
+            vertices[iVertex * 7 + 2] = z;
+
+            // set vertex colors
+            vertices[iVertex * 7 + 3] = 1 - (i / n);
+            vertices[iVertex * 7 + 4] = j / m;
+            vertices[iVertex * 7 + 5] = j / m;
+            vertices[iVertex * 7 + 6] = 1;
 
             // Set index.
             // Line on beam.
@@ -209,12 +223,87 @@ function createVertexDataHorn(vertices, indicesLines, indicesTris){
 
             // Line on ring.
             if(j>0 && i>0){
-                indicesLines[iIndexLines++] = iVertex-(m+1);
+                indicesLines[iIndexLines++] = iVertex - (m + 1);
                 indicesLines[iIndexLines++] = iVertex;
             }
 
             // 2 Tris
             if(j>0 && i>0) {
+                indicesTris[iIndexTris++] = iVertex;
+                indicesTris[iIndexTris++] = iVertex - 1;
+                indicesTris[iIndexTris++] = iVertex - (m + 1);
+
+                indicesTris[iIndexTris++] = iVertex - 1;
+                indicesTris[iIndexTris++] = iVertex - 1 - (m + 1);
+                indicesTris[iIndexTris++] = iVertex - (m + 1);
+
+            }
+        }
+    }
+    return {
+        vertices, 
+        indicesLines, 
+        indicesTris
+    };
+}
+
+function createVertexDataCustom(vertices, indicesLines, indicesTris){
+    let n = 32;
+    let m = 16;
+    // Positions.
+    vertices = new Float32Array((3 + 4) * (n + 1) * (m + 1));
+    // Index data for Line.
+    indicesLines = new Uint16Array(2 * 2 * n * m);
+    indicesTris = new Uint16Array(3 * 2 * m * n);
+
+    let dt = 2 * Math.PI / n;
+    let dr = 1 / m;
+    // Counter for entries in index array.
+    let iIndexLines = 0;
+    let iIndexTris = 0;
+
+    const a = 0.9; // xz size
+    const b = 0.3; // y size
+
+    // Loop angle t.
+    for(let i = 0, t = 0; i <= n; i++, t += dt) {
+
+        // Loop radius r.
+        for(let j = 0, r = 0; j <= m; j++, r += dr){
+
+            let iVertex = i*(m + 1) + j;
+
+            
+            let x = r * Math.cos(t) * 0.9;
+            let y =  r * r + 0.05 * (i % 4) - 0.5;
+            let z = r * Math.sin(t) * 0.9;
+
+            // Set vertex positions.
+            vertices[iVertex * 7] = x;
+            vertices[iVertex * 7 + 1] = y;
+            vertices[iVertex * 7 + 2] = z;
+
+            // set vertex colors
+            vertices[iVertex * 7 + 3] = i / n;
+            vertices[iVertex * 7 + 4] = j / m;
+            vertices[iVertex * 7 + 5] = 1 - (j / m);
+            vertices[iVertex * 7 + 6] = 1;
+
+            // Set index.
+            // Line on beam.
+            if(j > 0 && i > 0) {
+                indicesLines[iIndexLines++] = iVertex - 1;
+                indicesLines[iIndexLines++] = iVertex;
+            }
+
+            // Line on ring.
+            if(j > 0 && i > 0) {
+                indicesLines[iIndexLines++] = iVertex-(m+1);
+                indicesLines[iIndexLines++] = iVertex;
+            }
+
+            // 2 Tris
+            if(j > 0 && i > 0) {
                 indicesTris[iIndexTris++] = iVertex;
                 indicesTris[iIndexTris++] = iVertex - 1;
                 indicesTris[iIndexTris++] = iVertex - (m + 1);
