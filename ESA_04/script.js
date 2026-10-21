@@ -6,8 +6,8 @@ let canvas03 = document.getElementById('canvas03');
 
 
 drawOnCanvas(canvas01, "DINI");
-//drawOnCanvas(canvas02, "HORN");
-//drawOnCanvas(canvas03), "CUSTOM";
+drawOnCanvas(canvas02, "HORN");
+drawOnCanvas(canvas03, "DINI");
 
 function drawOnCanvas(canvas, mode) {
     let gl = canvas.getContext('experimental-webgl');
@@ -16,12 +16,20 @@ function drawOnCanvas(canvas, mode) {
     // Background  color
     gl.clearColor(0.7, 0.7, 0.8, 1);
 
+    // enable z-Buffer
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
+
+    // Polygon offset to fix z fighting
+    gl.enable(gl.POLYGON_OFFSET_FILL);
+    gl.polygonOffset(1.0, 1.0);
+
     // vertex shader
     let vsSource = 
                     'attribute vec3 pos;' +
                     'attribute vec4 col;' +
                     'varying vec4 color;' +
-        'void main(){color = col; gl_Position = vec4(2.0 * pos, 1);}';
+        'void main(){color = col; gl_Position = vec4(pos, 1);}';
     let vs = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vs, vsSource);
     gl.compileShader(vs);
@@ -45,11 +53,9 @@ function drawOnCanvas(canvas, mode) {
     switch (mode) {
         case "DINI":
            ({ vertices, indicesLines, indicesTris } = createVertexDataDini(vertices, indicesLines, indicesTris));
-            console.log("test");
             break;
         case "HORN":
             ({ vertices, indicesLines, indicesTris } = createVertexDataHorn(vertices, indicesLines, indicesTris));
-            console.log("test2");
             break;
     }
 
@@ -87,12 +93,12 @@ function drawOnCanvas(canvas, mode) {
 }
 
 function createVertexDataDini(vertices, indicesLines, indicesTris){
-    let n = 32;
+    let n = 24;
     let m = 12;
     // Positions.
     vertices = new Float32Array(3*(n+1)*(m+1));
     // Index data for Line.
-    indicesLines = new Uint16Array(2 * 2 * n * m);
+    indicesLines = new Uint16Array((2 * 2 * n * m) + 2 * m);
     indicesTris = new Uint16Array(3 * 2 * m * n);
 
     let dt = 4*Math.PI/n;
@@ -101,8 +107,8 @@ function createVertexDataDini(vertices, indicesLines, indicesTris){
     let iIndexLines = 0;
     let iIndexTris = 0;
 
-    const a = 0.3;
-    const b = 0.5;
+    const a = 0.9;
+    const b = 0.3;
 
     // Loop angle t.
     for(let i=0, t= 0; i <= n; i++, t += dt) {
@@ -114,8 +120,80 @@ function createVertexDataDini(vertices, indicesLines, indicesTris){
 
             // Dini surface (side) t >= 0.01!!
             let x = (a * Math.cos(t) * Math.sin(r));
-            let y = (a * (Math.cos(r) + Math.log(Math.tan(r / 2))) + b * t) / 10;
+            let y = (a * (Math.cos(r) + Math.log(Math.tan(r / 2))) + b * t) / 4;
             let z =( a * Math.sin(t) * Math.sin(r));
+
+            // Set vertex positions.
+            vertices[iVertex * 3] = x;
+            vertices[iVertex * 3 + 1] = y;
+            vertices[iVertex * 3 + 2] = z;
+
+            // set vertex colors TODO!!
+
+            // Set index.
+            // Line on beam.
+            if(j > 0){
+                indicesLines[iIndexLines++] = iVertex - 1;
+                indicesLines[iIndexLines++] = iVertex;
+            }
+
+            // Line on ring.
+            if(j>0 && i>0){
+                indicesLines[iIndexLines++] = iVertex-(m+1);
+                indicesLines[iIndexLines++] = iVertex;
+            }
+
+            // 2 Tris
+            if(j > 0 && i > 0) {
+                indicesTris[iIndexTris++] = iVertex;
+                indicesTris[iIndexTris++] = iVertex - 1;
+                indicesTris[iIndexTris++] = iVertex - (m + 1);
+
+                indicesTris[iIndexTris++] = iVertex - 1;
+                indicesTris[iIndexTris++] = iVertex - 1 - (m + 1);
+                indicesTris[iIndexTris++] = iVertex - (m + 1);
+
+            }
+        }
+    }
+    return {
+        vertices, 
+        indicesLines, 
+        indicesTris
+    };
+}
+
+function createVertexDataHorn(vertices, indicesLines, indicesTris){
+    let n = 32;
+    let m = 24;
+    // Positions.
+    vertices = new Float32Array(3*(n+1)*(m+1));
+    // Index data for Line.
+    indicesLines = new Uint16Array(2 * 2 * n * m);
+    indicesTris = new Uint16Array(3 * 2 * m * n);
+
+    let dt = 2*Math.PI/n;
+    let dr = 1/m;
+    // Counter for entries in index array.
+    let iIndexLines = 0;
+    let iIndexTris = 0;
+
+    const a = 2.25;
+    const b = 1.6;
+    const c = 1.5;
+
+    // Loop angle t.
+    for(let i=0, t= -Math.PI; i <= n; i++, t += dt) {
+
+        // Loop radius r.
+        for(let j=0, r=0; j <= m; j++, r += dr){
+
+            let iVertex = i*(m+1) + j;
+
+            // horn top a,b,c consts
+            let x = (a + r * Math.cos(t)) * Math.sin(b * Math.PI * r) / 3.5;
+            let y = ((a + r * Math.cos(t)) * Math.cos(b * Math.PI * r) + c * r) / 3.5;
+            let z = r * Math.sin(t);
 
             // Set vertex positions.
             vertices[iVertex * 3] = x;
@@ -153,79 +231,4 @@ function createVertexDataDini(vertices, indicesLines, indicesTris){
         indicesLines, 
         indicesTris
     };
-}
-
-function createVertexDataHorn(vertices, indicesLines, indicesTris){
-    let n = 64;
-    let m = 24;
-    // Positions.
-    vertices = new Float32Array(3*(n+1)*(m+1));
-    // Index data for Line.
-    indicesLines = new Uint16Array(2 * 2 * n * m);
-    indicesTris = new Uint16Array(3 * 2 * m * n);
-
-    let dt = 2*Math.PI/n;
-    let dr = 1/m;
-    // Counter for entries in index array.
-    let iIndexLines = 0;
-    let iIndexTris = 0;
-
-    const a = 2;
-    const b = 2.5;
-    const c = 1.6;
-
-    // Loop angle t.
-    for(let i=0, t= -Math.PI; i <= n; i++, t += dt) {
-
-        // Loop radius r.
-        for(let j=0, r=0; j <= m; j++, r += dr){
-
-            let iVertex = i*(m+1) + j;
-
-            // Funnel -> basis für eigenkreation oder so
-            // let x = r * Math.cos(t);
-            // let y = Math.log(r) / 2 + 0.5;
-            // let z = r * Math.sin(t);
-
-            // horn top a,b,c consts
-            let x = (a + r * Math.cos(t)) * Math.sin(b * Math.PI * r);
-            let y = (a + r * Math.cos(t)) * Math.cos(b * Math.PI * r) + c * r;
-            let z = r * Math.sin(t);
-
-            // horn side
-            // let x = (a + r * Math.cos(t)) * Math.sin(b * Math.PI * r);
-            // let y = r * Math.sin(t);
-            // let z = (a + r * Math.cos(t)) * Math.cos(b * Math.PI * r) + c * r;
-
-            // Set vertex positions.
-            vertices[iVertex * 3] = x;
-            vertices[iVertex * 3 + 1] = y;
-            vertices[iVertex * 3 + 2] = z;
-
-            // Set index.
-            // Line on beam.
-            if(j>0 && i>0){
-                indicesLines[iIndexLines++] = iVertex - 1;
-                indicesLines[iIndexLines++] = iVertex;
-            }
-
-            // Line on ring.
-            if(j>0 && i>0){
-                indicesLines[iIndexLines++] = iVertex-(m+1);
-                indicesLines[iIndexLines++] = iVertex;
-            }
-
-            // 2 Tris
-            if(j>0 && i>0) {
-                indicesTris[iIndexTris++] = iVertex;
-                indicesTris[iIndexTris++] = iVertex - 1;
-                indicesTris[iIndexTris++] = iVertex - (m + 1);
-
-                indicesTris[iIndexTris++] = iVertex - 1;
-                indicesTris[iIndexTris++] = iVertex - 1 - (m + 1);
-                indicesTris[iIndexTris++] = iVertex - (m + 1);
-
-            }
-        }
-    }
 }
