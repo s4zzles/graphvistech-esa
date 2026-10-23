@@ -12,7 +12,22 @@ main {
 }
 
 .canvas-container {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    justify-items: center;
+    margin-top: 2rem;
+}
+
+.canvas-item {
+    margin: 1rem;
+    p {
+        text-align: center;
+        font-size: 1.3rem;
+    }
+}
+
+.canvas-item:nth-child(3) {
+    grid-column: 1 / -1;
 }
 
 canvas {

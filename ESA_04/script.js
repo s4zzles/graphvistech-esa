@@ -275,7 +275,7 @@ function createVertexDataCustom(vertices, indicesLines, indicesTris){
 
             
             let x = r * Math.cos(t) * 0.9;
-            let y =  r * r + 0.05 * (i % 4) - 0.5;
+            let y = 0.85 * r * r  + (0.06 * r) * (i % 4) - 0.5; // WIP
             let z = r * Math.sin(t) * 0.9;
 
             // Set vertex positions.
@@ -284,9 +284,9 @@ function createVertexDataCustom(vertices, indicesLines, indicesTris){
             vertices[iVertex * 7 + 2] = z;
 
             // set vertex colors
-            vertices[iVertex * 7 + 3] = i / n;
-            vertices[iVertex * 7 + 4] = j / m;
-            vertices[iVertex * 7 + 5] = 1 - (j / m);
+            vertices[iVertex * 7 + 3] = r;
+            vertices[iVertex * 7 + 4] = 1 - 0.75 * r;
+            vertices[iVertex * 7 + 5] = 1 - 0.5 * r;
             vertices[iVertex * 7 + 6] = 1;
 
             // Set index.
