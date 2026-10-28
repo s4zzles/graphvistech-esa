@@ -4,12 +4,23 @@ let canvas01 = document.getElementById('canvas01');
 let canvas02 = document.getElementById('canvas02');
 let canvas03 = document.getElementById('canvas03');
 
+let renderMode = 0;
 
-drawOnCanvas(canvas01, "DINI");
-drawOnCanvas(canvas02, "HORN");
-drawOnCanvas(canvas03, "CUSTOM");
+drawOnCanvas(canvas01, "DINI", renderMode);
+drawOnCanvas(canvas02, "HORN", renderMode);
+drawOnCanvas(canvas03, "CUSTOM", renderMode);
 
-function drawOnCanvas(canvas, mode) {
+document.addEventListener("keydown", function(event) {
+    if(event.code === "KeyB") {
+        renderMode = (renderMode += 1) % 3;
+        drawOnCanvas(canvas01, "DINI", renderMode);
+        drawOnCanvas(canvas02, "HORN", renderMode);
+        drawOnCanvas(canvas03, "CUSTOM", renderMode);
+    }
+});
+
+
+function drawOnCanvas(canvas, surface, renderMode) {
     let gl = canvas.getContext('experimental-webgl');
 
     
@@ -50,7 +61,7 @@ function drawOnCanvas(canvas, mode) {
     let vertices, indicesLines, indicesTris;
 
 
-    switch (mode) {
+    switch (surface) {
         case "DINI":
            ({ vertices, indicesLines, indicesTris } = createVertexDataDini(vertices, indicesLines, indicesTris));
             break;
@@ -79,21 +90,28 @@ function drawOnCanvas(canvas, mode) {
     // Clear canvas and draw call
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    let iboTris = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboTris);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indicesTris,
-        gl.STATIC_DRAW);
 
-    gl.drawElements(gl.TRIANGLES, indicesTris.length, gl.UNSIGNED_SHORT, 0);
+    // Render Tris
+    if(renderMode != 1) {
+        let iboTris = gl.createBuffer();
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboTris);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indicesTris,
+            gl.STATIC_DRAW);
 
-    gl.disableVertexAttribArray(colAttrib);
-    gl.vertexAttrib4f(colAttrib, 0, 0, 0.5, 1);
-    let iboLines = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboLines);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indicesLines,
-        gl.STATIC_DRAW);
+        gl.drawElements(gl.TRIANGLES, indicesTris.length, gl.UNSIGNED_SHORT, 0);
+    }
+    
+    // Render lines in dark blue
+    if(renderMode != 2) {
+        gl.disableVertexAttribArray(colAttrib);
+        gl.vertexAttrib4f(colAttrib, 0, 0, 0.5, 1);
+        let iboLines = gl.createBuffer();
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboLines);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indicesLines,
+            gl.STATIC_DRAW);
 
-    gl.drawElements(gl.LINES, indicesLines.length, gl.UNSIGNED_SHORT, 0);
+        gl.drawElements(gl.LINES, indicesLines.length, gl.UNSIGNED_SHORT, 0);
+    } 
 }
 
 function createVertexDataDini(vertices, indicesLines, indicesTris){
