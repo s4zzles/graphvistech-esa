@@ -4,7 +4,7 @@ let canvas01 = document.getElementById('canvas01');
 let canvas02 = document.getElementById('canvas02');
 let canvas03 = document.getElementById('canvas03');
 
-let renderMode = 0;
+let renderMode = 0; // controls if lines+tris, lines or tris get rendered for either side or top view
 
 drawOnCanvas(canvas01, "DINI", renderMode);
 drawOnCanvas(canvas02, "HORN", renderMode);
@@ -12,7 +12,7 @@ drawOnCanvas(canvas03, "CUSTOM", renderMode);
 
 document.addEventListener("keydown", function(event) {
     if(event.code === "KeyB") {
-        renderMode = (renderMode += 1) % 3;
+        renderMode = (renderMode += 1) % 6;
         drawOnCanvas(canvas01, "DINI", renderMode);
         drawOnCanvas(canvas02, "HORN", renderMode);
         drawOnCanvas(canvas03, "CUSTOM", renderMode);
@@ -58,18 +58,19 @@ function drawOnCanvas(canvas, surface, renderMode) {
     gl.linkProgram(prog);
     gl.useProgram(prog);
 
-    let vertices, indicesLines, indicesTris;
 
+    let isSide = renderMode < 3;
+    let vertices, indicesLines, indicesTris;
 
     switch (surface) {
         case "DINI":
-           ({ vertices, indicesLines, indicesTris } = createVertexDataDini(vertices, indicesLines, indicesTris));
+           ({ vertices, indicesLines, indicesTris } = createVertexDataDini(vertices, indicesLines, indicesTris, isSide));
             break;
         case "HORN":
-            ({ vertices, indicesLines, indicesTris } = createVertexDataHorn(vertices, indicesLines, indicesTris));
+            ({ vertices, indicesLines, indicesTris } = createVertexDataHorn(vertices, indicesLines, indicesTris, isSide));
             break;
         case "CUSTOM":
-            ({ vertices, indicesLines, indicesTris } = createVertexDataCustom(vertices, indicesLines, indicesTris));
+            ({ vertices, indicesLines, indicesTris } = createVertexDataCustom(vertices, indicesLines, indicesTris, isSide));
     }
 
     let vbo = gl.createBuffer();
@@ -92,7 +93,7 @@ function drawOnCanvas(canvas, surface, renderMode) {
 
 
     // Render Tris
-    if(renderMode != 1) {
+    if(renderMode != 1 && renderMode != 4) {
         let iboTris = gl.createBuffer();
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboTris);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indicesTris,
@@ -102,7 +103,7 @@ function drawOnCanvas(canvas, surface, renderMode) {
     }
     
     // Render lines in dark blue
-    if(renderMode != 2) {
+    if(renderMode != 2 && renderMode != 5) {
         gl.disableVertexAttribArray(colAttrib);
         gl.vertexAttrib4f(colAttrib, 0, 0, 0.5, 1);
         let iboLines = gl.createBuffer();
@@ -114,7 +115,7 @@ function drawOnCanvas(canvas, surface, renderMode) {
     } 
 }
 
-function createVertexDataDini(vertices, indicesLines, indicesTris){
+function createVertexDataDini(vertices, indicesLines, indicesTris, isSide){
     let n = 24;
     let m = 12;
     // Positions.
@@ -140,10 +141,23 @@ function createVertexDataDini(vertices, indicesLines, indicesTris){
 
             let iVertex = i*(m+1) + j;
 
-            // Dini surface (side) t >= 0.01!!
-            let x = (a * Math.cos(t) * Math.sin(r));
-            let y = (a * (Math.cos(r) + Math.log(Math.tan(r / 2))) + b * t) / 4;
-            let z =( a * Math.sin(t) * Math.sin(r));
+            // Dini surface t >= 0.01!!
+            let p1 = (a * Math.cos(t) * Math.sin(r));
+            let p2 = (a * (Math.cos(r) + Math.log(Math.tan(r / 2))) + b * t) / 4;
+            let p3 =( a * Math.sin(t) * Math.sin(r));
+
+            let x, y, z;
+
+            if(isSide) {
+                x = p1;
+                y = p2;
+                z = p3;
+            }
+            else {
+                x = p1;
+                y = p3;
+                z = -p2;
+            }
 
             // Set vertex positions.
             vertices[iVertex * 7] = x;
@@ -189,7 +203,7 @@ function createVertexDataDini(vertices, indicesLines, indicesTris){
     };
 }
 
-function createVertexDataHorn(vertices, indicesLines, indicesTris) {
+function createVertexDataHorn(vertices, indicesLines, indicesTris, isSide) {
     let n = 16; // ring verts
     let m = 24; // bow verts
     // Positions.
@@ -216,10 +230,23 @@ function createVertexDataHorn(vertices, indicesLines, indicesTris) {
 
             let iVertex = i * (m + 1) + j;
 
-            // horn top a,b,c consts
-            let x = (a + r * Math.cos(t)) * Math.sin(b * Math.PI * r) / 3.5;
-            let y = ((a + r * Math.cos(t)) * Math.cos(b * Math.PI * r) + c * r) / 3.5;
-            let z = r * Math.sin(t);
+            // horn a,b,c consts
+            let p1 = (a + r * Math.cos(t)) * Math.sin(b * Math.PI * r) / 3.5;
+            let p2 = ((a + r * Math.cos(t)) * Math.cos(b * Math.PI * r) + c * r) / 3.5;
+            let p3 = r * Math.sin(t) / 3.5;
+
+            let x, y, z;
+
+            if(isSide) {
+                x = p1;
+                y = p2;
+                z = p3;
+            }
+            else {
+                x = p1;
+                y = p3;
+                z = -p2;
+            }
 
             // Set vertex positions.
             vertices[iVertex * 7] = x;
@@ -227,9 +254,9 @@ function createVertexDataHorn(vertices, indicesLines, indicesTris) {
             vertices[iVertex * 7 + 2] = z;
 
             // set vertex colors
-            vertices[iVertex * 7 + 3] = 1 - (i / n);
-            vertices[iVertex * 7 + 4] = j / m;
-            vertices[iVertex * 7 + 5] = j / m;
+            vertices[iVertex * 7 + 3] = (1 - r * Math.abs(Math.cos(2 * t)));
+            vertices[iVertex * 7 + 4] = 1 -r * Math.abs(Math.sin(2 * t));
+            vertices[iVertex * 7 + 5] = r;
             vertices[iVertex * 7 + 6] = 1;
 
             // Set index.
@@ -265,7 +292,7 @@ function createVertexDataHorn(vertices, indicesLines, indicesTris) {
     };
 }
 
-function createVertexDataCustom(vertices, indicesLines, indicesTris){
+function createVertexDataCustom(vertices, indicesLines, indicesTris, isSide){
     let n = 32;
     let m = 16;
     // Positions.
@@ -280,8 +307,8 @@ function createVertexDataCustom(vertices, indicesLines, indicesTris){
     let iIndexLines = 0;
     let iIndexTris = 0;
 
-    const a = 0.9; // xz size
-    const b = 0.3; // y size
+    const a = 1; // xz size
+    const b = 0.06; // knick size
 
     // Loop angle t.
     for(let i = 0, t = 0; i <= n; i++, t += dt) {
@@ -292,9 +319,22 @@ function createVertexDataCustom(vertices, indicesLines, indicesTris){
             let iVertex = i*(m + 1) + j;
 
             
-            let x = r * Math.cos(t) * 0.9;
-            let y = 0.85 * r * r  + (0.06 * r) * (i % 4) - 0.5; // WIP
-            let z = r * Math.sin(t) * 0.9;
+            let p1 = (r - (b * r) * (i % 4)) * Math.cos(t) * 0.9;
+            let p2 = a * r * r  + (b * r) * (i % 4) - 0.5;
+            let p3 = (r - (b * r) * (i % 4)) * Math.sin(t) * 0.9;
+
+            let x, y, z;
+
+            if(isSide) {
+                x = p1;
+                y = p2;
+                z = p3;
+            }
+            else {
+                x = p1;
+                y = p3;
+                z = -p2;
+            }
 
             // Set vertex positions.
             vertices[iVertex * 7] = x;
@@ -303,8 +343,8 @@ function createVertexDataCustom(vertices, indicesLines, indicesTris){
 
             // set vertex colors
             vertices[iVertex * 7 + 3] = r;
-            vertices[iVertex * 7 + 4] = 1 - 0.75 * r;
-            vertices[iVertex * 7 + 5] = 1 - 0.5 * r;
+            vertices[iVertex * 7 + 4] = 1 - r;
+            vertices[iVertex * 7 + 5] = (1 - 0.5 * Math.abs(Math.sin(4 * t))) * r;
             vertices[iVertex * 7 + 6] = 1;
 
             // Set index.

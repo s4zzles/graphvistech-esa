@@ -7,28 +7,63 @@
         <meta charset="UTF-8">
         <link rel="stylesheet" href="style.css">
         <title>ESA04: Parametrisierte Flächen</title>
+        <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
     </head>
     <body>
         <main>
             <h1>ESA04: Parametrisierte Flächen</h1>
-            <div class="canvas-container">
-                <div class="canvas-item">
+            <div class="grid-container">
+                <div class="grid-item">
                     <canvas id="canvas01" width="500" height="500"></canvas>
-                <p>Dini Surface</p>
+                <p>Dini's Surface</p>
             </div>
-                <div class="canvas-item">
+                <div class="grid-item">
                     <canvas id="canvas02" width="500" height="500"></canvas>
                 <p>Horn</p>
             </div>
-                <div class="canvas-item">
+                <div class="grid-item">
                     <canvas id="canvas03" width="500" height="500"></canvas>
                 <p>Papierblüte</p>
             </div>
             </div>
             <h2>Interaktionen:</h2>
-            <p>B: Schaltet zwischen den Render-Modi "Linien+Tris", "Linien" und "Tris" um.</p>
+            <p>B: Schaltet zwischen den Render-Modi "Linien+Tris", "Linien" und "Tris" jeweils für die Seiten- und Top-Ansicht um.</p>
+            <h2>Anmerkungen:</h2>
+            <p>Die folgenden Gleichungen wurden für die parametrisierten Flächen verwendet:</p>
+            <p>Dini's Surface:</p>
+            <div class="formula">
+                \[
+                \begin{aligned}
+                x &= 0.9 \cos(u) \sin(v) \\
+                y &= 0.9 \sin(u) \sin(v) \\
+                z &= 0.9 (\cos(v) + \ln(\tan(v/2))) + 0.3 u
+                \end{aligned}
+                \]
+            </div>
+            <p>Horn:</p>
+            <div class="formula">
+                \[
+                \begin{aligned}
+                x &= (2.25 + u \cos(v)) \sin(1.6 \pi u)  \\
+                y &= (2.25 + u \cos(v)) \cos(1.6 \pi u) + 1.5u \\
+                z &= u \sin(v) 
+                \end{aligned}
+                \]
+            </div>
+            <p>Papierblüte:</p>
+            <div class="formula">
+                \[
+                \begin{aligned}
+                x &= u - 0.06u (i \bmod 4) \cos(v) \\
+                y &= u - 0.06u (i \bmod 4) \sin(v) \\
+                z &= u^2 + 0.06u (i \bmod 4) 0.9 \sin(v) \\
+                i &: \text {Index der vom Ursprung ausgehenden Strahlen}
+                \end{aligned}
+                \]
+            </div>
+            
             <h2>Quellen:</h2>
-            <p>Für die Dini Surface und das Horn wurden die Gleichungen der unten stehenden Quellen verwendet. <br>Die Papierblüte ist aus von mir erstellten Gleichungen entstanden.</p>
+            <p>Die Gleichungen für Dini's Surface und das Horn stammen aus den untenstehenden Quellen.</p>
             <p>Dini Surface: <a href="http://www.3d-meier.de/tut3/Seite9.html">Link</a></p>
             <p>Horn: <a href="http://www.3d-meier.de/tut3/Seite48.html">Link</a></p>
             <a id="back" href="../index.html">Zurück zur Übersicht</a>

@@ -11,14 +11,14 @@ main {
     min-height: 100vh;
 }
 
-.canvas-container {
+.grid-container {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     justify-items: center;
     margin-top: 2rem;
 }
 
-.canvas-item {
+.grid-item {
     margin: 1rem;
     p {
         text-align: center;
@@ -26,8 +26,12 @@ main {
     }
 }
 
-.canvas-item:nth-child(3) {
+.grid-item:nth-child(3) {
     grid-column: 1 / -1;
+}
+
+.formula {
+    font-size: 1rem;
 }
 
 canvas {
