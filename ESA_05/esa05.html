@@ -1,9 +1,15 @@
 <!DOCTYPE html5>
-<html>
+<html lang="de">
 	<head>
+		<style>
+        @import url('https://fonts.googleapis.com/css2?family=Merriweather+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+        </style>
+		<meta charset="UTF-8">
+		<link rel="stylesheet" href="style.css">
+		<title>ESA05: Kamerabewegung</title>
 		<script src="../src/gl-matrix.js"></script>
-		<script src="GVT_Src_vertexData_torus.js"></script>
-		<script src="KAP_Src_tpl.js"></script>
+		<script src="vertexData.js"></script>
+		<script src="app.js"></script>
 		<script type="x-shader/x-vertex" id="vertexshader">
 			attribute vec3 aPosition;
 			attribute vec3 aNormal;
@@ -30,6 +36,16 @@
 		</script>
 	</head>
 	<body onload="app.start()">
-		<canvas id="canvas" width="500" height="500"></canvas>
+		<main>
+			<h1>ESA05: Kamerabewegung</h1>
+			<canvas id="canvas" width="700" height="700"></canvas>
+			<p>Henno wolrd! :DD</p>
+            <a id="back" href="../index.html">Zurück zur Übersicht</a>
+			<footer>
+                <p>Diese Seite ist im Zuge des VFH-Kurses "Graphical Visualisation Technologies" entstanden.</p>
+                <p>Erstellt von Philipp Becker</p>
+            </footer>
+		</main>
+		
 	</body>
 </html>
