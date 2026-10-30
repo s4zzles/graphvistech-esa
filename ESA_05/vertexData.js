@@ -1,39 +1,39 @@
 var torus = ( function() {
 
 	function createVertexData() {
-		var n = 16;
-		var m = 32;
+		let n = 16;
+		let m = 32;
 
 		// Positions.
 		this.vertices = new Float32Array(3 * (n + 1) * (m + 1));
-		var vertices = this.vertices;
+		let vertices = this.vertices;
 		// Normals.
 		this.normals = new Float32Array(3 * (n + 1) * (m + 1));
-		var normals = this.normals;
+		let normals = this.normals;
 		// Index data.
 		this.indicesLines = new Uint16Array(2 * 2 * n * m);
-		var indicesLines = this.indicesLines;
+		let indicesLines = this.indicesLines;
 		this.indicesTris = new Uint16Array(3 * 2 * n * m);
-		var indicesTris = this.indicesTris;
+		let indicesTris = this.indicesTris;
 
-		var du = 2 * Math.PI / n;
-		var dv = 2 * Math.PI / m;
-		var r = 0.3;
-		var R = 0.5;
+		let du = 2 * Math.PI / n;
+		let dv = 2 * Math.PI / m;
+		let r = 0.3;
+		let R = 0.5;
 		// Counter for entries in index array.
-		var iLines = 0;
-		var iTris = 0;
+		let iLines = 0;
+		let iTris = 0;
 
 		// Loop angle u.
-		for(var i = 0, u = 0; i <= n; i++, u += du) {
+		for(let i = 0, u = 0; i <= n; i++, u += du) {
 			// Loop angle v.
-			for(var j = 0, v = 0; j <= m; j++, v += dv) {
+			for(let j = 0, v = 0; j <= m; j++, v += dv) {
 
-				var iVertex = i * (m + 1) + j;
+				let iVertex = i * (m + 1) + j;
 
-				var x = (R + r * Math.cos(u) ) * Math.cos(v);
-				var y = (R + r * Math.cos(u) ) * Math.sin(v);
-				var z = r * Math.sin(u);
+				let x = (R + r * Math.cos(u) ) * Math.cos(v);
+				let y = (R + r * Math.cos(u) ) * Math.sin(v);
+				let z = r * Math.sin(u);
 
 				// Set vertex positions.
 				vertices[iVertex * 3] = x;
@@ -41,9 +41,9 @@ var torus = ( function() {
 				vertices[iVertex * 3 + 2] = z;
 
 				// Calc and set normals.
-				var nx = Math.cos(u) * Math.cos(v);
-				var ny = Math.cos(u) * Math.sin(v);
-				var nz = Math.sin(u);
+				let nx = Math.cos(u) * Math.cos(v);
+				let ny = Math.cos(u) * Math.sin(v);
+				let nz = Math.sin(u);
 				normals[iVertex * 3] = nx;
 				normals[iVertex * 3 + 1] = ny;
 				normals[iVertex * 3 + 2] = nz;
@@ -77,6 +77,90 @@ var torus = ( function() {
 				}
 			}
 		}
+	}
+
+	return {
+		createVertexData : createVertexData
+	}
+
+}());
+
+var plane = ( function() {
+
+	function createVertexData() {
+		let n = 10; // x
+		let m = 10; // z
+
+		// Positions.
+		this.vertices = new Float32Array(3 * (n * m));
+		let vertices = this.vertices;
+		// Normals.
+		this.normals = new Float32Array(3 * (n * m));
+		let normals = this.normals;
+		// Index data.
+		this.indicesLines = new Uint16Array(4 * n * m - 2 * n - 2 * m);
+		let indicesLines = this.indicesLines;
+		this.indicesTris = new Uint16Array(2 * 3 * (n - 1) * (m - 1));
+		let indicesTris = this.indicesTris;
+
+		let du = 2 / n;
+		let dv = 2 / m;
+
+		// Counter for entries in index array.
+		let iLines = 0;
+		let iTris = 0;
+
+		// Loop width
+		for(let i = 0, u = 0; i < n; i++, u += du) {
+			// Loop depth
+			for(let j = 0, v = 0; j < m; j++, v += dv) {
+
+				let iVertex = (i * m) + j;
+
+				let x = u;
+				let y = 0;
+				let z = v;
+
+				// Set vertex positions.
+				vertices[iVertex * 3] = x;
+				vertices[iVertex * 3 + 1] = y;
+				vertices[iVertex * 3 + 2] = z;
+
+				// Calc and set normals.
+				let nx = 0;
+				let ny = 1;
+				let nz = 0;
+				normals[iVertex * 3] = nx;
+				normals[iVertex * 3 + 1] = ny;
+				normals[iVertex * 3 + 2] = nz;
+
+
+				// Set index.
+				// Line on beam.
+				if(j > 0) {
+					indicesLines[iLines++] = iVertex - 1;
+					indicesLines[iLines++] = iVertex;
+				}
+				// Line on ring.
+				if(i > 0) {
+					indicesLines[iLines++] = iVertex - m;
+					indicesLines[iLines++] = iVertex;
+				}
+
+				// Set index.
+				// Two Triangles.
+				if(j > 0 && i > 0) {
+					indicesTris[iTris++] = iVertex;
+					indicesTris[iTris++] = iVertex - 1;
+					indicesTris[iTris++] = iVertex - (m + 1);
+					//
+					indicesTris[iTris++] = iVertex - (m + 1);
+					indicesTris[iTris++] = iVertex - (m + 1) + 1;
+					indicesTris[iTris++] = iVertex;
+				}
+			}
+		}
+		console.log(indicesTris);
 	}
 
 	return {

@@ -1,15 +1,15 @@
-var app = ( function() {
+let app = ( function() {
 
-	var gl;
+	let gl;
 
 	// The shader program object is also used to
 	// store attribute and uniform locations.
-	var prog;
+	let prog;
 
 	// Array of model objects.
-	var models = [];
+	let models = [];
 
-	var camera = {
+	let camera = {
 		// Initial position of the camera.
 		eye : [0, 1, 4],
 		// Point to look at.
@@ -63,7 +63,7 @@ var app = ( function() {
 	 * be in render function.
 	 */
 	function initPipline() {
-		gl.clearColor(.95, .95, .95, 1);
+		gl.clearColor(.8, .8, .8, 1);
 
 		// Backface culling.
 		gl.frontFace(gl.CCW);
@@ -87,9 +87,9 @@ var app = ( function() {
 
 	function initShaderProgram() {
 		// Init vertex shader.
-		var vs = initShader(gl.VERTEX_SHADER, "vertexshader");
+		let vs = initShader(gl.VERTEX_SHADER, "vertexshader");
 		// Init fragment shader.
-		var fs = initShader(gl.FRAGMENT_SHADER, "fragmentshader");
+		let fs = initShader(gl.FRAGMENT_SHADER, "fragmentshader");
 		// Link shader into a shader program.
 		prog = gl.createProgram();
 		gl.attachShader(prog, vs);
@@ -107,8 +107,8 @@ var app = ( function() {
 	 * @returns shader object.
 	 */
 	function initShader(shaderType, SourceTagId) {
-		var shader = gl.createShader(shaderType);
-		var shaderSource = document.getElementById(SourceTagId).text;
+		let shader = gl.createShader(shaderType);
+		let shaderSource = document.getElementById(SourceTagId).text;
 		gl.shaderSource(shader, shaderSource);
 		gl.compileShader(shader);
 		if(!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
@@ -127,9 +127,9 @@ var app = ( function() {
 	}
 
 	function initModels() {
-		// fill-style
-		var fs = "fillwireframe";
-		createModel("torus", fs);
+
+		createModel("torus", "fillwireframe");
+		createModel("plane", "fillwireframe");
 	}
 
 	/**
@@ -139,7 +139,7 @@ var app = ( function() {
 	 * @parameter fillstyle: wireframe, fill, fillwireframe.
 	 */
  function createModel(geometryname, fillstyle) {
-		var model = {};
+		let model = {};
 		model.fillstyle = fillstyle;
 		initDataAndBuffers(model, geometryname);
 		// Create and initialize Model-View-Matrix.
@@ -197,8 +197,8 @@ var app = ( function() {
 	function initEventHandler() {
 
 		window.onkeydown = function(evt) {
-			var key = evt.which ? evt.which : evt.keyCode;
-			var c = String.fromCharCode(key);
+			let key = evt.which ? evt.which : evt.keyCode; // fix this!
+			let c = String.fromCharCode(key);
 			// console.log(evt);
 
 			// Change projection of scene.
@@ -224,9 +224,11 @@ var app = ( function() {
 		setProjection();
 
 		mat4.identity(camera.vMatrix);
+		mat4.rotate(camera.vMatrix, camera.vMatrix, Math.PI/4, [1,0,0]);
+
 
 		// Loop over models.
-		for(var i = 0; i < models.length; i++) {
+		for(let i = 0; i < models.length; i++) {
 			// Update modelview for model.
 			mat4.copy(models[i].mvMatrix, camera.vMatrix);
 
@@ -242,7 +244,7 @@ var app = ( function() {
 		// Set projection Matrix.
 		switch(camera.projectionType) {
 			case("ortho"):
-				var v = camera.lrtb;
+				let v = camera.lrtb;
 				mat4.ortho(camera.pMatrix, -v, v, -v, v, -10, 10);
 				break;
 		}
@@ -260,7 +262,7 @@ var app = ( function() {
 		gl.vertexAttribPointer(prog.normalAttrib,3,gl.FLOAT,false,0,0);
 
 		// Setup rendering tris.
-		var fill = (model.fillstyle.search(/fill/) != -1);
+		let fill = (model.fillstyle.search(/fill/) != -1);
 		if(fill) {
 			gl.enableVertexAttribArray(prog.normalAttrib);
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.iboTris);
@@ -269,7 +271,7 @@ var app = ( function() {
 		}
 
 		// Setup rendering lines.
-		var wireframe = (model.fillstyle.search(/wireframe/) != -1);
+		let wireframe = (model.fillstyle.search(/wireframe/) != -1);
 		if(wireframe) {
 			gl.disableVertexAttribArray(prog.normalAttrib);
 			gl.vertexAttrib3f(prog.normalAttrib, 0, 0, 0);
