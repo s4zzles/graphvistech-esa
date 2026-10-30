@@ -88,9 +88,10 @@ function drawOnCanvas(canvas, surface, renderMode) {
     gl.enableVertexAttribArray(colAttrib);
 
 
-    // Clear canvas and draw call
-    gl.clear(gl.COLOR_BUFFER_BIT);
+    // Clear framebuffer and depthbuffer
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+    // Draw calls
 
     // Render Tris
     if(renderMode != 1 && renderMode != 4) {
