@@ -131,7 +131,10 @@ let app = ( function() {
 
 		//createModel("torus", "fillwireframe");
 		createModel("plane", "wireframe");
-		createModel("cylinder", "fillwireframe");
+		// createModel("cylinder", "fillwireframe");
+		// createModel("cone", "fillwireframe");
+		createModel("sphere", "fill");
+		
 	}
 
 	/**
