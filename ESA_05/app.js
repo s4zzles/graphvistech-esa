@@ -33,6 +33,7 @@ let app = ( function() {
 		zAngle : 0,
 		// Distance in XZ-Plane from center when orbiting.
 		distance : 4,
+		height : 2
 	};
 
 	function start() {
@@ -129,7 +130,7 @@ let app = ( function() {
 	function initModels() {
 
 		createModel("torus", "fillwireframe");
-		createModel("plane", "fillwireframe");
+		createModel("plane", "wireframe");
 	}
 
 	/**
@@ -196,16 +197,39 @@ let app = ( function() {
 
 	function initEventHandler() {
 
-		window.onkeydown = function(evt) {
-			let key = evt.which ? evt.which : evt.keyCode; // fix this!
-			let c = String.fromCharCode(key);
-			// console.log(evt);
+		window.onkeydown = function(event) {
+			let sign = event.shiftKey ? -1 : 1;
+
 
 			// Change projection of scene.
-			switch(c) {
-				case('O'):
+			switch(event.code) {
+				case('KeyO'):
 					camera.projectionType = "ortho";
 					camera.lrtb = 2;
+					break;
+				case('KeyF'):
+					camera.projectionType = "frustum";
+					camera.lrtb = 1;
+					break;
+				case('KeyP'):
+					camera.projectionType = "perspective";
+					break;
+				case('KeyC'):
+					deltaAngle = Math.PI * 2 / 180;
+					camera.zAngle += deltaAngle * sign;
+					camera.zAngle %= Math.PI * 2;
+					break;
+				case('KeyD'):
+					camera.distance -= 0.1 * sign;
+					break;
+				case('KeyH'):
+					camera.height += 0.1 * sign;
+					break;
+				case('KeyB'):
+					camera.fovy *= 1.01;
+					break;
+				case('KeyV'):
+					camera.fovy *= 0.99;
 					break;
 			}
 
@@ -223,9 +247,7 @@ let app = ( function() {
 
 		setProjection();
 
-		mat4.identity(camera.vMatrix);
-		mat4.rotate(camera.vMatrix, camera.vMatrix, Math.PI/4, [1,0,0]);
-
+		camera.vMatrix = calculateCameraOrbit();
 
 		// Loop over models.
 		for(let i = 0; i < models.length; i++) {
@@ -240,12 +262,27 @@ let app = ( function() {
 		}
 	}
 
+	function calculateCameraOrbit() {
+		let camTrajectory = [camera.distance * Math.cos(camera.zAngle), camera.height,
+			camera.distance * Math.sin(camera.zAngle)];
+		let out = mat4.create();
+		out = mat4.lookAt(out, camTrajectory, camera.center, camera.up);
+		return out;
+	}
+
 	function setProjection() {
 		// Set projection Matrix.
 		switch(camera.projectionType) {
 			case("ortho"):
-				let v = camera.lrtb;
+				var v = camera.lrtb;
 				mat4.ortho(camera.pMatrix, -v, v, -v, v, -10, 10);
+				break;
+			case("frustum"):
+				var v = camera.lrtb;
+				mat4.frustum(camera.pMatrix, -v, v, -v, v, 2, 10);
+				break;
+			case("perspective"):
+				mat4.perspective(camera.pMatrix, camera.fovy, 1, 2, 10);
 				break;
 		}
 		// Set projection uniform.

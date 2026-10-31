@@ -1,8 +1,8 @@
 var torus = ( function() {
 
 	function createVertexData() {
-		let n = 16;
-		let m = 32;
+		let n = 12;
+		let m = 24;
 
 		// Positions.
 		this.vertices = new Float32Array(3 * (n + 1) * (m + 1));
@@ -18,8 +18,8 @@ var torus = ( function() {
 
 		let du = 2 * Math.PI / n;
 		let dv = 2 * Math.PI / m;
-		let r = 0.3;
-		let R = 0.5;
+		let r = 0.35;
+		let R = 1;
 		// Counter for entries in index array.
 		let iLines = 0;
 		let iTris = 0;
@@ -48,9 +48,6 @@ var torus = ( function() {
 				normals[iVertex * 3 + 1] = ny;
 				normals[iVertex * 3 + 2] = nz;
 
-				// if(i>14){
-				// continue;
-				// }
 
 				// Set index.
 				// Line on beam.
@@ -88,8 +85,11 @@ var torus = ( function() {
 var plane = ( function() {
 
 	function createVertexData() {
-		let n = 10; // x
-		let m = 10; // z
+		let n = 15; // x verts
+		let m = 15; // z verts
+
+		let width = 4;
+		let depth = 4;
 
 		// Positions.
 		this.vertices = new Float32Array(3 * (n * m));
@@ -103,17 +103,17 @@ var plane = ( function() {
 		this.indicesTris = new Uint16Array(2 * 3 * (n - 1) * (m - 1));
 		let indicesTris = this.indicesTris;
 
-		let du = 2 / n;
-		let dv = 2 / m;
+		let du = width / n;
+		let dv = depth / m;
 
 		// Counter for entries in index array.
 		let iLines = 0;
 		let iTris = 0;
 
 		// Loop width
-		for(let i = 0, u = 0; i < n; i++, u += du) {
+		for(let i = 0, u = -width / 2 + du / 2; i < n; i++, u += du) {
 			// Loop depth
-			for(let j = 0, v = 0; j < m; j++, v += dv) {
+			for(let j = 0, v = -depth / 2 + dv / 2; j < m; j++, v += dv) {
 
 				let iVertex = (i * m) + j;
 
@@ -160,7 +160,6 @@ var plane = ( function() {
 				}
 			}
 		}
-		console.log(indicesTris);
 	}
 
 	return {
