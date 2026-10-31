@@ -129,8 +129,9 @@ let app = ( function() {
 
 	function initModels() {
 
-		createModel("torus", "fillwireframe");
+		//createModel("torus", "fillwireframe");
 		createModel("plane", "wireframe");
+		createModel("cylinder", "fillwireframe");
 	}
 
 	/**
@@ -282,7 +283,7 @@ let app = ( function() {
 				mat4.frustum(camera.pMatrix, -v, v, -v, v, 2, 10);
 				break;
 			case("perspective"):
-				mat4.perspective(camera.pMatrix, camera.fovy, 1, 2, 10);
+				mat4.perspective(camera.pMatrix, camera.fovy, 1, 0.1, 10);
 				break;
 		}
 		// Set projection uniform.

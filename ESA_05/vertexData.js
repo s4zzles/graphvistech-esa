@@ -136,12 +136,11 @@ var plane = ( function() {
 
 
 				// Set index.
-				// Line on beam.
 				if(j > 0) {
 					indicesLines[iLines++] = iVertex - 1;
 					indicesLines[iLines++] = iVertex;
 				}
-				// Line on ring.
+
 				if(i > 0) {
 					indicesLines[iLines++] = iVertex - m;
 					indicesLines[iLines++] = iVertex;
@@ -157,6 +156,93 @@ var plane = ( function() {
 					indicesTris[iTris++] = iVertex - (m + 1);
 					indicesTris[iTris++] = iVertex - (m + 1) + 1;
 					indicesTris[iTris++] = iVertex;
+				}
+			}
+		}
+	}
+
+	return {
+		createVertexData : createVertexData
+	}
+
+}());
+
+
+var cylinder = ( function() {
+
+	function createVertexData() {
+		let n = 24; // circle verts
+		let m = 8; // line verts
+
+		let r = 1;
+		let height = 2;
+
+		// Positions.
+		this.vertices = new Float32Array(3 * ((n + 1) * m));
+		let vertices = this.vertices;
+		// Normals.
+		this.normals = new Float32Array(3 * ((n + 1) * m));
+		let normals = this.normals;
+		// Index data.
+		this.indicesLines = new Uint16Array(5 * n * m - 2 * n - 2 * m); // TODO
+		let indicesLines = this.indicesLines;
+		this.indicesTris = new Uint16Array(3 * 3 * (n - 1) * (m - 1)); // TODO
+		let indicesTris = this.indicesTris;
+
+		let du = Math.PI * 2 / n;
+		let dv = height / m;
+
+		// Counter for entries in index array.
+		let iLines = 0;
+		let iTris = 0;
+
+		// Loop width
+		for(let i = 0, u = 0; i <= n; i++, u += du) {
+			// Loop depth
+			for(let j = 0, v = 0; j < m; j++, v += dv) {
+
+				let iVertex = (i * m) + j;
+
+				let x = r * Math.cos(u);
+				let y = v;
+				let z = r * Math.sin(u);
+
+				// Set vertex positions.
+				vertices[iVertex * 3] = x;
+				vertices[iVertex * 3 + 1] = y;
+				vertices[iVertex * 3 + 2] = z;
+
+				// Calc and set normals.
+				let nx = Math.cos(u);
+				let ny = 0;
+				let nz = Math.sin(u);
+				normals[iVertex * 3] = nx;
+				normals[iVertex * 3 + 1] = ny;
+				normals[iVertex * 3 + 2] = nz;
+
+
+				// Set index.
+				// Line on beam.
+				if(j > 0 && i > 0) {
+					indicesLines[iLines++] = iVertex - 1;
+					indicesLines[iLines++] = iVertex;
+				}
+				// Line on ring.
+				if(i > 0) {
+					indicesLines[iLines++] = iVertex - m;
+					indicesLines[iLines++] = iVertex;
+				}
+
+				// Set index.
+				// Two Triangles.
+				if(j > 0 && i > 0) {
+					indicesTris[iTris++] = iVertex;
+					indicesTris[iTris++] = iVertex - (m + 1);
+					indicesTris[iTris++] = iVertex - (m+1) +1;
+					
+					indicesTris[iTris++] = iVertex;
+					indicesTris[iTris++] = iVertex - 1;
+					indicesTris[iTris++] = iVertex - (m + 1);
 				}
 			}
 		}
