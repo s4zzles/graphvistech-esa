@@ -254,14 +254,14 @@ var cylinder = ( function() {
 
 }());
 
-var cone = ( function() { // TODO fix tri direction
+var cone = ( function() {
 
 	function createVertexData() {
 		let n = 24; // circle verts
 		let m = 2; // line verts
 
-		let r = 0.6;
-		let height = 2;
+		let r = 0.2;
+		let height = 1.5;
 
 		// Positions.
 		this.vertices = new Float32Array(3 * (n + 1) * (m + 1));
@@ -300,11 +300,12 @@ var cone = ( function() { // TODO fix tri direction
 
 				// Calc and set normals.
 				let nx = Math.cos(u);
-				let ny = 1 - v / r;
+				let ny = r;
 				let nz = Math.sin(u);
-				normals[iVertex * 3] = nx;
-				normals[iVertex * 3 + 1] = ny;
-				normals[iVertex * 3 + 2] = nz;
+				let vertexLength = Math.sqrt(nx * nx + ny * ny + nz * nz);
+				normals[iVertex * 3] = nx /= vertexLength;
+				normals[iVertex * 3 + 1] = ny /= vertexLength;
+				normals[iVertex * 3 + 2] = nz /= vertexLength;
 
 
 				// Set index.
@@ -323,12 +324,13 @@ var cone = ( function() { // TODO fix tri direction
 				// Two Triangles.
 				if(j > 0 && i > 0) {
 					indicesTris[iTris++] = iVertex;
-					indicesTris[iTris++] = iVertex - 1;
 					indicesTris[iTris++] = iVertex - (m + 1);
+					indicesTris[iTris++] = iVertex - 1;
+					
 					
 					indicesTris[iTris++] = iVertex - 1;
-					indicesTris[iTris++] = iVertex - (m + 1) - 1;
 					indicesTris[iTris++] = iVertex - (m + 1);
+					indicesTris[iTris++] = iVertex - (m + 1) - 1;
 				}
 			}
 		}
@@ -340,11 +342,11 @@ var cone = ( function() { // TODO fix tri direction
 
 }());
 
-var sphere = ( function() { // TODO fix tri direction
+var sphere = ( function() {
 
 	function createVertexData() {
 		let n = 24; // circle verts
-		let m = 8; // line verts
+		let m = 12; // line verts
 
 		let r = 0.6;
 
@@ -410,12 +412,14 @@ var sphere = ( function() { // TODO fix tri direction
 				// Two Triangles.
 				if(j > 0 && i > 0) {
 					indicesTris[iTris++] = iVertex;
-					indicesTris[iTris++] = iVertex - 1;
 					indicesTris[iTris++] = iVertex - (m + 1);
+					indicesTris[iTris++] = iVertex - 1;
+					
 					
 					indicesTris[iTris++] = iVertex - 1;
-					indicesTris[iTris++] = iVertex - (m + 1) - 1;
 					indicesTris[iTris++] = iVertex - (m + 1);
+					indicesTris[iTris++] = iVertex - (m + 1) - 1;
+					
 				}
 			}
 		}
