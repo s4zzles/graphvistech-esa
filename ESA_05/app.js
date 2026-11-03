@@ -5,6 +5,7 @@ let app = ( function() {
 	// The shader program object is also used to
 	// store attribute and uniform locations.
 	let prog;
+	let icoStep = 4;
 
 	// Array of model objects.
 	let models = [];
@@ -130,10 +131,11 @@ let app = ( function() {
 	function initModels() {
 
 		//createModel("torus", "fillwireframe");
-		createModel("plane", "wireframe");
+		createModel("disk", "fill");
 		// createModel("cylinder", "fillwireframe");
-		createModel("cone", "fillwireframe");
+		// createModel("cone", "fillwireframe");
 		//createModel("sphere", "fillwireframe");
+		createModel("icosphere", "fillwireframe");
 		
 	}
 
@@ -164,7 +166,14 @@ let app = ( function() {
 		// Fill data arrays for Vertex-Positions, Normals, Index data:
 		// vertices, normals, indicesLines, indicesTris;
 		// Pointer this refers to the window.
-		this[geometryname]['createVertexData'].apply(model);
+		if( geometryname != "icosphere") {
+			this[geometryname]['createVertexData'].apply(model);
+		}
+		else {
+			this[geometryname]['createVertexData'].apply(model, [0.6, icoStep]);
+
+		}
+		
 
 		// Setup position vertex buffer object.
 		model.vboPos = gl.createBuffer();
