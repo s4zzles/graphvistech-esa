@@ -130,11 +130,16 @@ let app = ( function() {
 
 	function initModels() {
 
-		//createModel("icosphere", "fillwireframe");
-		createModel("torus", "fillwireframe");
-		// createModel("cylinder", "fillwireframe");
-		// createModel("cone", "fillwireframe");
-		//createModel("sphere", "fillwireframe");
+		createModel("icosphere", "fillwireframe", [0.5, icoStep]);
+		createModel("torus", "fill", [1.3, 0.08, false]);
+		createModel("torus", "fill", [1, 0.08, true]);
+		//createModel("disk", "fillwireframe", [2.5]);
+		//createModel("cylinder", "fillwireframe");
+		//createModel("cone", "fillwireframe");
+		createModel("sphere", "fill", [0.15, 1, 0, 0, 1, 0]);
+		createModel("sphere", "fill", [0.15, -1, 0, 0, 0, 1]);
+		createModel("sphere", "fill", [0.15, 0, 0, 1, 0, 0]);
+		createModel("sphere", "fill", [0.15, 0, 0, -1, 1, 1]);
 		
 	}
 
@@ -144,10 +149,10 @@ let app = ( function() {
 	 * @parameter geometryname: string with name of geometry.
 	 * @parameter fillstyle: wireframe, fill, fillwireframe.
 	 */
- function createModel(geometryname, fillstyle) {
+ function createModel(geometryname, fillstyle, varArray) {
 		let model = {};
 		model.fillstyle = fillstyle;
-		initDataAndBuffers(model, geometryname);
+		initDataAndBuffers(model, geometryname, varArray);
 		// Create and initialize Model-View-Matrix.
 		model.mvMatrix = mat4.create();
 
@@ -160,18 +165,12 @@ let app = ( function() {
 	 * @parameter model: a model object to augment with data.
 	 * @parameter geometryname: string with name of geometry.
 	 */
-	function initDataAndBuffers(model, geometryname) {
+	function initDataAndBuffers(model, geometryname, varArray) {
 		// Provide model object with vertex data arrays.
 		// Fill data arrays for Vertex-Positions, Normals, Index data:
 		// vertices, normals, indicesLines, indicesTris;
 		// Pointer this refers to the window.
-		if( geometryname != "icosphere") {
-			this[geometryname]['createVertexData'].apply(model);
-		}
-		else {
-			this[geometryname]['createVertexData'].apply(model, [0.6, icoStep]);
-
-		}
+		this[geometryname]['createVertexData'].apply(model, varArray);
 		
 
 		// Setup position vertex buffer object.
@@ -218,10 +217,6 @@ let app = ( function() {
 					camera.projectionType = "ortho";
 					camera.lrtb = 2;
 					break;
-				case('KeyF'):
-					camera.projectionType = "frustum";
-					camera.lrtb = 1;
-					break;
 				case('KeyP'):
 					camera.projectionType = "perspective";
 					break;
@@ -235,17 +230,14 @@ let app = ( function() {
 					camera.zAngle -= deltaAngle;
 					camera.zAngle %= Math.PI * 2;
 					break;
-				case('KeyD'):
+				case('KeyN'):
 					camera.distance -= 0.1 * sign;
 					break;
-				case('KeyH'):
-					camera.height += 0.1 * sign;
+				case('ArrowUp'):
+					camera.height += 0.1;
 					break;
-				case('KeyB'):
-					camera.fovy *= 1.01;
-					break;
-				case('KeyV'):
-					camera.fovy *= 0.99;
+				case('ArrowDown'):
+					camera.height -= 0.1;
 					break;
 				case('NumpadAdd'):
 					icoStep += 1;
@@ -331,7 +323,7 @@ let app = ( function() {
 		let wireframe = (model.fillstyle.search(/wireframe/) != -1);
 		if(wireframe) {
 			gl.disableVertexAttribArray(prog.colorAttrib);
-			gl.vertexAttrib4f(prog.colorAttrib, 0,0,1,1);
+			gl.vertexAttrib4f(prog.colorAttrib, 1,1,1,1);
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.iboLines);
 			gl.drawElements(gl.LINES, model.iboLines.numberOfElements,
 				gl.UNSIGNED_SHORT, 0);

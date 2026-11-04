@@ -1,6 +1,6 @@
 var torus = ( function() {
 
-	function createVertexData(outerRadius = 1.2, innerRadius = 0.08, horizontal = true) {
+	function createVertexData(outerRadius = 1.2, innerRadius = 0.18, horizontal = false) {
 		let n = 12;
 		let m = 32;
 
@@ -50,14 +50,20 @@ var torus = ( function() {
 				let nx = Math.cos(u) * Math.cos(v);
 				let ny = Math.cos(u) * Math.sin(v);
 				let nz = Math.sin(u);
+
+				// switch ny and nz for horizontal render mode
+				if(horizontal) {
+					[ny, nz] = [nz, ny];
+				}
+
 				vertices[iVertex * 10 + 3] = nx;
 				vertices[iVertex * 10 + 4] = ny;
 				vertices[iVertex * 10 + 5] = nz;
 
 				// Set vertex color
-				vertices[iVertex * 10 + 6] = 1;
-				vertices[iVertex * 10 + 7] = 1;
-				vertices[iVertex * 10 + 8] = 0;
+				vertices[iVertex * 10 + 6] = (nx + 1) / 2;
+				vertices[iVertex * 10 + 7] = (ny + 1) / 2;
+				vertices[iVertex * 10 + 8] = (nz + 1) / 2;
 				vertices[iVertex * 10 + 9] = 1;
 
 
@@ -117,11 +123,9 @@ var plane = ( function() {
 		let depth = 4;
 
 		// Positions.
-		this.vertices = new Float32Array(3 * (n * m));
+		this.vertices = new Float32Array(3 * 3 * 4 * (n * m));
 		let vertices = this.vertices;
-		// Normals.
-		this.normals = new Float32Array(3 * (n * m));
-		let normals = this.normals;
+
 		// Index data.
 		this.indicesLines = new Uint16Array(4 * n * m - 2 * n - 2 * m);
 		let indicesLines = this.indicesLines;
@@ -147,18 +151,23 @@ var plane = ( function() {
 				let z = v;
 
 				// Set vertex positions.
-				vertices[iVertex * 3] = x;
-				vertices[iVertex * 3 + 1] = y;
-				vertices[iVertex * 3 + 2] = z;
+				vertices[iVertex * 10] = x;
+				vertices[iVertex * 10 + 1] = y;
+				vertices[iVertex * 10 + 2] = z;
 
 				// Calc and set normals.
 				let nx = 0;
 				let ny = 1;
 				let nz = 0;
-				normals[iVertex * 3] = nx;
-				normals[iVertex * 3 + 1] = ny;
-				normals[iVertex * 3 + 2] = nz;
+				vertices[iVertex * 10 + 3] = nx;
+				vertices[iVertex * 10 + 4] = ny;
+				vertices[iVertex * 10 + 5] = nz;
 
+				// set vertex color
+				vertices[iVertex * 10 + 6] = 0;
+				vertices[iVertex * 10 + 7] = 0;
+				vertices[iVertex * 10 + 8] = 0;
+				vertices[iVertex * 10 + 9] = 1;
 
 				// Set index.
 				if(j > 0) {
@@ -203,11 +212,9 @@ var cylinder = ( function() {
 		let height = 2;
 
 		// Positions.
-		this.vertices = new Float32Array(3 * (n + 1) * (m + 1));
+		this.vertices = new Float32Array(3 * 3 * 4 * (n + 1) * (m + 1));
 		let vertices = this.vertices;
-		// Normals.
-		this.normals = new Float32Array(3 * (n + 1) * (m + 1));
-		let normals = this.normals;
+
 		// Index data.
 		this.indicesLines = new Uint16Array(4 * m * n + 2 * n);
 		let indicesLines = this.indicesLines;
@@ -233,17 +240,23 @@ var cylinder = ( function() {
 				let z = r * Math.sin(u);
 
 				// Set vertex positions.
-				vertices[iVertex * 3] = x;
-				vertices[iVertex * 3 + 1] = y;
-				vertices[iVertex * 3 + 2] = z;
+				vertices[iVertex * 10] = x;
+				vertices[iVertex * 10 + 1] = y;
+				vertices[iVertex * 10 + 2] = z;
 
 				// Calc and set normals.
 				let nx = Math.cos(u);
 				let ny = 0;
 				let nz = Math.sin(u);
-				normals[iVertex * 3] = nx;
-				normals[iVertex * 3 + 1] = ny;
-				normals[iVertex * 3 + 2] = nz;
+				vertices[iVertex * 10 + 3] = nx;
+				vertices[iVertex * 10 + 4] = ny;
+				vertices[iVertex * 10 + 5] = nz;
+
+				// set vertex color
+				vertices[iVertex * 10 + 6] = (nx + 1) / 2;
+				vertices[iVertex * 10 + 7] = (ny + 1) / 2;
+				vertices[iVertex * 10 + 8] = (nz + 1) / 2;
+				vertices[iVertex * 10 + 9] = 1;
 
 
 				// Set index.
@@ -289,11 +302,9 @@ var cone = ( function() {
 		let height = 1.5;
 
 		// Positions.
-		this.vertices = new Float32Array(3 * (n + 1) * (m + 1));
+		this.vertices = new Float32Array(3 * 3 * 4 * (n + 1) * (m + 1));
 		let vertices = this.vertices;
-		// Normals.
-		this.normals = new Float32Array(3 * (n + 1) * (m + 1));
-		let normals = this.normals;
+
 		// Index data.
 		this.indicesLines = new Uint16Array(4 * m * n + 2 * n);
 		let indicesLines = this.indicesLines;
@@ -319,19 +330,24 @@ var cone = ( function() {
 				let z = r * v * Math.sin(u);
 
 				// Set vertex positions.
-				vertices[iVertex * 3] = x;
-				vertices[iVertex * 3 + 1] = y;
-				vertices[iVertex * 3 + 2] = z;
+				vertices[iVertex * 10] = x;
+				vertices[iVertex * 10 + 1] = y;
+				vertices[iVertex * 10 + 2] = z;
 
 				// Calc and set normals.
 				let nx = Math.cos(u);
 				let ny = r;
 				let nz = Math.sin(u);
 				let vertexLength = Math.sqrt(nx * nx + ny * ny + nz * nz);
-				normals[iVertex * 3] = nx /= vertexLength;
-				normals[iVertex * 3 + 1] = ny /= vertexLength;
-				normals[iVertex * 3 + 2] = nz /= vertexLength;
+				vertices[iVertex * 10 + 3] = nx / vertexLength;
+				vertices[iVertex * 10 + 4] = ny / vertexLength;
+				vertices[iVertex * 10 + 5] = nz / vertexLength;
 
+				// set vertex color
+				vertices[iVertex * 10 + 6] = (nx + 1) / 2;
+				vertices[iVertex * 10 + 7] = (ny + 1) / 2;
+				vertices[iVertex * 10 + 8] = (nz + 1) / 2;
+				vertices[iVertex * 10 + 9] = 1;
 
 				// Set index.
 				// Line on beam.
@@ -369,18 +385,16 @@ var cone = ( function() {
 
 var disk = ( function() {
 
-	function createVertexData() {
+	function createVertexData(radius) {
 		let n = 32; // circle verts
 		let m = 8; // line verts
 
-		let r = 1.8;
+		let r = radius;
 
 		// Positions.
-		this.vertices = new Float32Array(3 * (n + 1) * (m + 1));
+		this.vertices = new Float32Array(3 * 3 * 4 * (n + 1) * (m + 1));
 		let vertices = this.vertices;
-		// Normals.
-		this.normals = new Float32Array(3 * (n + 1) * (m + 1));
-		let normals = this.normals;
+
 		// Index data.
 		this.indicesLines = new Uint16Array(4 * m * n + 2 * n);
 		let indicesLines = this.indicesLines;
@@ -406,18 +420,24 @@ var disk = ( function() {
 				let z = r * v * Math.sin(u);
 
 				// Set vertex positions.
-				vertices[iVertex * 3] = x;
-				vertices[iVertex * 3 + 1] = y;
-				vertices[iVertex * 3 + 2] = z;
+				vertices[iVertex * 10] = x;
+				vertices[iVertex * 10 + 1] = y;
+				vertices[iVertex * 10 + 2] = z;
 
 				// Calc and set normals.
 				let nx = 0;
 				let ny = 1;
 				let nz = 0;
 				let vertexLength = Math.sqrt(nx * nx + ny * ny + nz * nz);
-				normals[iVertex * 3] = nx / vertexLength;
-				normals[iVertex * 3 + 1] = ny / vertexLength;
-				normals[iVertex * 3 + 2] = nz / vertexLength;
+				vertices[iVertex * 10 + 3] = nx / vertexLength;
+				vertices[iVertex * 10 + 4] = ny / vertexLength;
+				vertices[iVertex * 10 + 5] = nz / vertexLength;
+
+				// set vertex colors
+				vertices[iVertex * 10 + 6] = 1;
+				vertices[iVertex * 10 + 7] = 0;
+				vertices[iVertex * 10 + 8] = 1;
+				vertices[iVertex * 10 + 9] = 1;
 
 
 				// Set index.
@@ -457,18 +477,16 @@ var disk = ( function() {
 
 var sphere = ( function() {
 
-	function createVertexData() {
+	function createVertexData(radius = 1, xOffset, yOffset, zOffset, red, blue) {
 		let n = 24; // circle verts
 		let m = 12; // line verts
 
-		let r = 0.6;
+		let r = radius;
 
 		// Positions.
-		this.vertices = new Float32Array(3 * (n + 1) * (m + 1));
+		this.vertices = new Float32Array(3 * 3 * 4 * (n + 1) * (m + 1));
 		let vertices = this.vertices;
-		// Normals.
-		this.normals = new Float32Array(3 * (n + 1) * (m + 1));
-		let normals = this.normals;
+
 		// Index data.
 		this.indicesLines = new Uint16Array(4 * m * n + 2 * n);
 		let indicesLines = this.indicesLines;
@@ -489,14 +507,14 @@ var sphere = ( function() {
 
 				let iVertex = i * (m + 1) + j;
 
-				let x = r * Math.sin(v) * Math.cos(u);
-				let y = r * Math.cos(v);
-				let z = r * Math.sin(v) * Math.sin(u);
+				let x = r * Math.sin(v) * Math.cos(u) + xOffset;
+				let y = r * Math.cos(v) + yOffset;
+				let z = r * Math.sin(v) * Math.sin(u) + zOffset;
 
 				// Set vertex positions.
-				vertices[iVertex * 3] = x;
-				vertices[iVertex * 3 + 1] = y;
-				vertices[iVertex * 3 + 2] = z;
+				vertices[iVertex * 10] = x;
+				vertices[iVertex * 10 + 1] = y;
+				vertices[iVertex * 10 + 2] = z;
 
 				// Calc and set normals.
 
@@ -504,9 +522,15 @@ var sphere = ( function() {
 				let nx = x/vertexLength;
 				let ny = y/vertexLength;
 				let nz = z/vertexLength;
-				normals[iVertex * 3] = nx;
-				normals[iVertex * 3 + 1] = ny;
-				normals[iVertex * 3 + 2] = nz;
+				vertices[iVertex * 10 + 3] = nx;
+				vertices[iVertex * 10 + 4] = ny;
+				vertices[iVertex * 10 + 5] = nz;
+
+				// set vertex color
+				vertices[iVertex * 10 + 6] = red;
+				vertices[iVertex * 10 + 7] = Math.cos(12 * v);
+				vertices[iVertex * 10 + 8] = blue;
+				vertices[iVertex * 10 + 9] = 1;
 
 
 				// Set index.
@@ -545,12 +569,11 @@ var sphere = ( function() {
 }());
 
 
-var icosphere = (function() {
+var icosphere = ( function() {
 
     function createVertexData(radius = 1, depth = 2) {
 
         let vertices = [];
-        let normals = [];
         let indicesTris = [];
         let indicesLines = [];
 
@@ -569,19 +592,29 @@ var icosphere = (function() {
             ];
         }
 
-        // Add a vertex and its normal.
+        // Add a vertex, normal and vertex color
         function addVertex(v) {
-            let index = vertices.length / 3;
+            let index = vertices.length / 10;
 
-            let p = normalize(v);
+            let [x,y,z] = normalize(v);
 
-            vertices.push(p[0], p[1], p[2]);
+			// position
+            vertices.push(x, y, z);
 
-            normals.push(
-                p[0] / radius,
-                p[1] / radius,
-                p[2] / radius
-            );
+			// normal
+			let nx = x / radius;
+			let ny = y / radius;
+			let nz = z / radius;
+
+            vertices.push(nx, ny, nz);
+
+			// vertex color
+			vertices.push(
+				nx + 1 / 2,
+                ny + 1 / 2,
+                nz + 1 / 2,
+				1
+			)
 
             return index;
         }
@@ -655,7 +688,6 @@ var icosphere = (function() {
 
         // Convert arrays into typed arrays.
         this.vertices = new Float32Array(vertices);
-        this.normals = new Float32Array(normals);
         this.indicesTris = new Uint16Array(indicesTris);
         this.indicesLines = new Uint16Array(indicesLines);
     }
