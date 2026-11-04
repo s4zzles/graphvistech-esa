@@ -5,7 +5,7 @@ let app = ( function() {
 	// The shader program object is also used to
 	// store attribute and uniform locations.
 	let prog;
-	let icoStep = 4;
+	let icoStep = 0;
 
 	// Array of model objects.
 	let models = [];
@@ -28,7 +28,7 @@ let app = ( function() {
 		// Projection matrix.
 		pMatrix : mat4.create(),
 		// Projection types: ortho, perspective, frustum.
-		projectionType : "ortho",
+		projectionType : "perspective",
 		// Angle to Z-Axis for camera when orbiting the center
 		// given in radian.
 		zAngle : 0,
@@ -65,7 +65,7 @@ let app = ( function() {
 	 * be in render function.
 	 */
 	function initPipline() {
-		gl.clearColor(.8, .8, .8, 1);
+		gl.clearColor(.15, 0, .3, 1);
 
 		// Backface culling.
 		gl.frontFace(gl.CCW);
@@ -130,12 +130,11 @@ let app = ( function() {
 
 	function initModels() {
 
-		//createModel("torus", "fillwireframe");
-		createModel("disk", "fill");
+		//createModel("icosphere", "fillwireframe");
+		createModel("torus", "fillwireframe");
 		// createModel("cylinder", "fillwireframe");
 		// createModel("cone", "fillwireframe");
 		//createModel("sphere", "fillwireframe");
-		createModel("icosphere", "fillwireframe");
 		
 	}
 
@@ -176,20 +175,20 @@ let app = ( function() {
 		
 
 		// Setup position vertex buffer object.
-		model.vboPos = gl.createBuffer();
-		gl.bindBuffer(gl.ARRAY_BUFFER, model.vboPos);
+		model.vbo = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, model.vbo);
 		gl.bufferData(gl.ARRAY_BUFFER, model.vertices, gl.STATIC_DRAW);
-		// Bind vertex buffer to attribute variable.
+
+		// Bind vertex buffer to attribute variables
 		prog.positionAttrib = gl.getAttribLocation(prog, 'aPosition');
 		gl.enableVertexAttribArray(prog.positionAttrib);
 
-		// Setup normal vertex buffer object.
-		model.vboNormal = gl.createBuffer();
-		gl.bindBuffer(gl.ARRAY_BUFFER, model.vboNormal);
-		gl.bufferData(gl.ARRAY_BUFFER, model.normals, gl.STATIC_DRAW);
-		// Bind buffer to attribute variable.
-		prog.normalAttrib = gl.getAttribLocation(prog, 'aNormal');
-		gl.enableVertexAttribArray(prog.normalAttrib);
+		// commented out because normals arent used in the shader
+		// prog.normalAttrib = gl.getAttribLocation(prog, 'aNormal');
+		// gl.enableVertexAttribArray(prog.normalAttrib);
+
+		prog.colorAttrib = gl.getAttribLocation(prog, 'aColor');
+		gl.enableVertexAttribArray(prog.colorAttrib);
 
 		// Setup lines index buffer object.
 		model.iboLines = gl.createBuffer();
@@ -213,7 +212,6 @@ let app = ( function() {
 		window.onkeydown = function(event) {
 			let sign = event.shiftKey ? -1 : 1;
 
-
 			// Change projection of scene.
 			switch(event.code) {
 				case('KeyO'):
@@ -227,9 +225,14 @@ let app = ( function() {
 				case('KeyP'):
 					camera.projectionType = "perspective";
 					break;
-				case('KeyC'):
+				case('ArrowRight'):
 					deltaAngle = Math.PI * 2 / 180;
-					camera.zAngle += deltaAngle * sign;
+					camera.zAngle += deltaAngle;
+					camera.zAngle %= Math.PI * 2;
+					break;
+				case('ArrowLeft'):
+					deltaAngle = Math.PI * 2 / 180;
+					camera.zAngle -= deltaAngle;
 					camera.zAngle %= Math.PI * 2;
 					break;
 				case('KeyD'):
@@ -243,6 +246,12 @@ let app = ( function() {
 					break;
 				case('KeyV'):
 					camera.fovy *= 0.99;
+					break;
+				case('NumpadAdd'):
+					icoStep += 1;
+					break;
+				case('NumpadSubtract'):
+					icoStep -= 1;
 					break;
 			}
 
@@ -304,17 +313,15 @@ let app = ( function() {
 
 	function draw(model) {
 		// Setup position VBO.
-		gl.bindBuffer(gl.ARRAY_BUFFER, model.vboPos);
-		gl.vertexAttribPointer(prog.positionAttrib,3,gl.FLOAT,false,0,0);
-
-		// Setup normal VBO.
-		gl.bindBuffer(gl.ARRAY_BUFFER, model.vboNormal);
-		gl.vertexAttribPointer(prog.normalAttrib,3,gl.FLOAT,false,0,0);
+		gl.bindBuffer(gl.ARRAY_BUFFER, model.vbo);
+		gl.vertexAttribPointer(prog.positionAttrib,3,gl.FLOAT,false,40,0);
+		//gl.vertexAttribPointer(prog.normalAttrib,3,gl.FLOAT,false,40,12);
+		gl.vertexAttribPointer(prog.colorAttrib,4,gl.FLOAT,false,40,24);
 
 		// Setup rendering tris.
 		let fill = (model.fillstyle.search(/fill/) != -1);
 		if(fill) {
-			gl.enableVertexAttribArray(prog.normalAttrib);
+			gl.enableVertexAttribArray(prog.colorAttrib);
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.iboTris);
 			gl.drawElements(gl.TRIANGLES, model.iboTris.numberOfElements,
 				gl.UNSIGNED_SHORT, 0);
@@ -323,8 +330,8 @@ let app = ( function() {
 		// Setup rendering lines.
 		let wireframe = (model.fillstyle.search(/wireframe/) != -1);
 		if(wireframe) {
-			gl.disableVertexAttribArray(prog.normalAttrib);
-			gl.vertexAttrib3f(prog.normalAttrib, 0, 0, 0);
+			gl.disableVertexAttribArray(prog.colorAttrib);
+			gl.vertexAttrib4f(prog.colorAttrib, 0,0,1,1);
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.iboLines);
 			gl.drawElements(gl.LINES, model.iboLines.numberOfElements,
 				gl.UNSIGNED_SHORT, 0);

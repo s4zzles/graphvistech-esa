@@ -12,7 +12,8 @@
 		<script src="app.js"></script>
 		<script type="x-shader/x-vertex" id="vertexshader">
 			attribute vec3 aPosition;
-			attribute vec3 aNormal;
+			// attribute vec3 aNormal;
+			attribute vec4 aColor;
 
 			uniform mat4 uPMatrix;
 			uniform mat4 uMVMatrix;
@@ -22,8 +23,7 @@
 			void main(){
 				gl_Position = uPMatrix * uMVMatrix * vec4(aPosition, 1.0);
 	
-				vColor = vec4(aNormal.x, aNormal.y, aNormal.z, 1.0);
-				vColor = (vColor + 1.0) / 2.0;
+				vColor = aColor;
 			}
 		</script>
 		<script type="x-shader/x-fragment" id="fragmentshader">
@@ -39,7 +39,7 @@
 		<main>
 			<h1>ESA05: Kamerabewegung</h1>
 			<canvas id="canvas" width="700" height="700"></canvas>
-			<p>Henno wolrd! :DD</p>
+			<p>Dysonsphere-Spacestation</p>
             <a id="back" href="../index.html">Zurück zur Übersicht</a>
 			<footer>
                 <p>Diese Seite ist im Zuge des VFH-Kurses "Graphical Visualisation Technologies" entstanden.</p>

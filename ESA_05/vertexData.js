@@ -1,15 +1,13 @@
 var torus = ( function() {
 
-	function createVertexData() {
+	function createVertexData(outerRadius = 1.2, innerRadius = 0.08, horizontal = true) {
 		let n = 12;
-		let m = 24;
+		let m = 32;
 
-		// Positions.
-		this.vertices = new Float32Array(3 * (n + 1) * (m + 1));
+		// Position, normal, vertexcolor
+		this.vertices = new Float32Array(3 * 3 * 4 * (n + 1) * (m + 1));
 		let vertices = this.vertices;
-		// Normals.
-		this.normals = new Float32Array(3 * (n + 1) * (m + 1));
-		let normals = this.normals;
+
 		// Index data.
 		this.indicesLines = new Uint16Array(2 * 2 * n * m);
 		let indicesLines = this.indicesLines;
@@ -18,8 +16,8 @@ var torus = ( function() {
 
 		let du = 2 * Math.PI / n;
 		let dv = 2 * Math.PI / m;
-		let r = 0.35;
-		let R = 1;
+		let r = innerRadius;
+		let R = outerRadius;
 		// Counter for entries in index array.
 		let iLines = 0;
 		let iTris = 0;
@@ -35,18 +33,32 @@ var torus = ( function() {
 				let y = (R + r * Math.cos(u) ) * Math.sin(v);
 				let z = r * Math.sin(u);
 
+
+				// switch y and z to render horizontal
+				if(horizontal) {
+					[y, z] = [z, y];
+				}
+
 				// Set vertex positions.
-				vertices[iVertex * 3] = x;
-				vertices[iVertex * 3 + 1] = y;
-				vertices[iVertex * 3 + 2] = z;
+				vertices[iVertex * 10] = x;
+				vertices[iVertex * 10 + 1] = y;
+				vertices[iVertex * 10 + 2] = z;
+
+
 
 				// Calc and set normals.
 				let nx = Math.cos(u) * Math.cos(v);
 				let ny = Math.cos(u) * Math.sin(v);
 				let nz = Math.sin(u);
-				normals[iVertex * 3] = nx;
-				normals[iVertex * 3 + 1] = ny;
-				normals[iVertex * 3 + 2] = nz;
+				vertices[iVertex * 10 + 3] = nx;
+				vertices[iVertex * 10 + 4] = ny;
+				vertices[iVertex * 10 + 5] = nz;
+
+				// Set vertex color
+				vertices[iVertex * 10 + 6] = 1;
+				vertices[iVertex * 10 + 7] = 1;
+				vertices[iVertex * 10 + 8] = 0;
+				vertices[iVertex * 10 + 9] = 1;
 
 
 				// Set index.
@@ -64,13 +76,26 @@ var torus = ( function() {
 				// Set index.
 				// Two Triangles.
 				if(j > 0 && i > 0) {
-					indicesTris[iTris++] = iVertex;
-					indicesTris[iTris++] = iVertex - 1;
-					indicesTris[iTris++] = iVertex - (m + 1);
+					let t1v1 = iVertex;
+					let t1v2 = iVertex -1;
+					let t1v3 = iVertex - (m + 1);
+
+					let t2v1 = iVertex - 1;
+					let t2v2 = iVertex - (m + 1) - 1;
+					let t2v3 = iVertex - (m + 1);
+
+					// switch winding order for horizontal render mode
+					if(horizontal) {
+						[t1v1, t1v3] = [t1v3, t1v1];
+						[t2v1, t2v3] = [t2v3, t2v1];
+					}
+					indicesTris[iTris++] = t1v1;
+					indicesTris[iTris++] = t1v2;
+					indicesTris[iTris++] = t1v3;
 					//
-					indicesTris[iTris++] = iVertex - 1;
-					indicesTris[iTris++] = iVertex - (m + 1) - 1;
-					indicesTris[iTris++] = iVertex - (m + 1);
+					indicesTris[iTris++] = t2v1;
+					indicesTris[iTris++] = t2v2;
+					indicesTris[iTris++] = t2v3;
 				}
 			}
 		}
