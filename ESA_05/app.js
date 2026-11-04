@@ -19,7 +19,7 @@ let app = ( function() {
 		up : [0, 1, 0],
 		// Opening angle given in radian.
 		// radian = degree*2*PI/360.
-		fovy : 60.0 * Math.PI / 180,
+		fovy : 45.0 * Math.PI / 180,
 		// Camera near plane dimensions:
 		// value for left right top bottom in projection.
 		lrtb : 2.0,
@@ -131,15 +131,16 @@ let app = ( function() {
 	function initModels() {
 
 		createModel("icosphere", "fillwireframe", [0.5, icoStep]);
-		createModel("torus", "fill", [1.3, 0.08, false]);
-		createModel("torus", "fill", [1, 0.08, true]);
-		//createModel("disk", "fillwireframe", [2.5]);
-		//createModel("cylinder", "fillwireframe");
-		//createModel("cone", "fillwireframe");
-		createModel("sphere", "fill", [0.15, 1, 0, 0, 1, 0]);
-		createModel("sphere", "fill", [0.15, -1, 0, 0, 0, 1]);
-		createModel("sphere", "fill", [0.15, 0, 0, 1, 0, 0]);
-		createModel("sphere", "fill", [0.15, 0, 0, -1, 1, 1]);
+		createModel("torus", "fill", [1.3, 0.07, false]);
+		createModel("torus", "fill", [1, 0.07, true]);
+		createModel("sphere", "fill", [0.14, 1, 0, 0, 0, 1]);
+		createModel("sphere", "fill", [0.14, -1, 0, 0, 0, 1]);
+		createModel("sphere", "fill", [0.14, 0, 0, 1, 1, 0]);
+		createModel("sphere", "fill", [0.14, 0, 0, -1, 1, 0]);
+		createModel("sphere", "fill", [0.14, 0, 1.3, 0, 0, 0]);
+		createModel("sphere", "fill", [0.14, 0, -1.3, 0, 0, 0]);
+		createModel("sphere", "fill", [0.14, 1.3, 0, 0, 1, 1]);
+		createModel("sphere", "fill", [0.14, -1.3, 0, 0, 1, 1]);
 		
 	}
 
@@ -231,7 +232,7 @@ let app = ( function() {
 					camera.zAngle %= Math.PI * 2;
 					break;
 				case('KeyN'):
-					camera.distance -= 0.1 * sign;
+					camera.distance *= 1 - 0.05 * sign;
 					break;
 				case('ArrowUp'):
 					camera.height += 0.1;
@@ -240,16 +241,25 @@ let app = ( function() {
 					camera.height -= 0.1;
 					break;
 				case('NumpadAdd'):
-					icoStep += 1;
+					updateIcoSphere(1);
 					break;
 				case('NumpadSubtract'):
-					icoStep -= 1;
+					updateIcoSphere(-1);
 					break;
 			}
 
 			// Render the scene again on any key pressed.
 			render();
 		};
+	}
+
+	function updateIcoSphere(stepDirection) {
+		icoStep = Math.max(Math.min(icoStep + stepDirection, 5), 0);
+		var model = {};
+		model.fillstyle = "fillwireframe";
+		initDataAndBuffers(model, "icosphere", [0.5, icoStep]);
+		model.mvMatrix = mat4.create();
+		models[0] = model;
 	}
 
 	/**
@@ -290,10 +300,6 @@ let app = ( function() {
 			case("ortho"):
 				var v = camera.lrtb;
 				mat4.ortho(camera.pMatrix, -v, v, -v, v, -10, 10);
-				break;
-			case("frustum"):
-				var v = camera.lrtb;
-				mat4.frustum(camera.pMatrix, -v, v, -v, v, 2, 10);
 				break;
 			case("perspective"):
 				mat4.perspective(camera.pMatrix, camera.fovy, 1, 0.1, 10);

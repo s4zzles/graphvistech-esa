@@ -61,9 +61,9 @@ var torus = ( function() {
 				vertices[iVertex * 10 + 5] = nz;
 
 				// Set vertex color
-				vertices[iVertex * 10 + 6] = (nx + 1) / 2;
-				vertices[iVertex * 10 + 7] = (ny + 1) / 2;
-				vertices[iVertex * 10 + 8] = (nz + 1) / 2;
+				vertices[iVertex * 10 + 6] = 1;
+				vertices[iVertex * 10 + 7] = Math.max(-Math.cos(u), 0) + 0.5;
+				vertices[iVertex * 10 + 8] = 0.5 * Math.max(-Math.cos(u), 0) + 0.2;
 				vertices[iVertex * 10 + 9] = 1;
 
 
