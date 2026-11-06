@@ -44,7 +44,7 @@ let app = ( function() {
 	function init() {
 		initWebGL();
 		initShaderProgram();
-		initUniforms()
+		initUniforms();
 		initModels();
 		initEventHandler();
 		initPipeline();
@@ -125,10 +125,13 @@ let app = ( function() {
 
 		// Model-View-Matrix.
 		prog.mvMatrixUniform = gl.getUniformLocation(prog, "uMVMatrix");
+
+		// Normal-Matrix
+		prog.nMatrixUniform = gl.getUniformLocation(prog, "uNMatrix");
 	}
 
 	function initModels() {
-		createModel("torus", "fill", [0, 0, 0], [0, 0, 0], [1, 1, 1], [0.6, 0.1]);
+		createModel("torus", "fill", [0, 0, 0], [0, Math.PI/4, 0], [1, 1, 1], [0.6, 0.1]);
 		createModel("sphere", "fill", [1, 0, 0], [0, 0, 0], [1, 1, 1], [0.2, 0, 1]);
 		createModel("sphere", "fill", [0, 0, 1], [0, 0, 0], [1, 1, 1], [0.2, 1, 0]);
 		createModel("sphere", "fill", [-1, 0, 0], [0, 0, 0], [1, 1, 1], [0.2, 1, 1]);
@@ -163,6 +166,9 @@ let app = ( function() {
 
 		// Create and initialize Model-View-Matrix.
 		model.mvMatrix = mat4.create();
+
+		// Create and initialize Normal-Matrix.
+		model.nMatrix = mat3.create();
 	}
 
 
@@ -190,8 +196,8 @@ let app = ( function() {
 		gl.enableVertexAttribArray(prog.positionAttrib);
 
 		// commented out because normals arent used in the shader
-		// prog.normalAttrib = gl.getAttribLocation(prog, 'aNormal');
-		// gl.enableVertexAttribArray(prog.normalAttrib);
+		prog.normalAttrib = gl.getAttribLocation(prog, 'aNormal');
+		gl.enableVertexAttribArray(prog.normalAttrib);
 
 		prog.colorAttrib = gl.getAttribLocation(prog, 'aColor');
 		gl.enableVertexAttribArray(prog.colorAttrib);
@@ -229,12 +235,12 @@ let app = ( function() {
 					break;
 				case('ArrowRight'):
 					deltaAngle = Math.PI * 2 / 180;
-					camera.zAngle += deltaAngle;
+					camera.zAngle -= deltaAngle;
 					camera.zAngle %= Math.PI * 2;
 					break;
 				case('ArrowLeft'):
 					deltaAngle = Math.PI * 2 / 180;
-					camera.zAngle -= deltaAngle;
+					camera.zAngle += deltaAngle;
 					camera.zAngle %= Math.PI * 2;
 					break;
 				case('KeyN'):
@@ -273,14 +279,17 @@ let app = ( function() {
 			// Set uniforms for model.
 			gl.uniformMatrix4fv(prog.mvMatrixUniform, false,
 				models[i].mvMatrix);
+
+			gl.uniformMatrix3fv(prog.nMatrixUniform, false,
+                models[i].nMatrix);
 			
 			draw(models[i]);
 		}
 	}
 
 	function calculateCameraOrbit() {
-		let camTrajectory = [camera.distance * Math.cos(camera.zAngle), camera.height,
-			camera.distance * Math.sin(camera.zAngle)];
+		let camTrajectory = [camera.distance * Math.sin(camera.zAngle), camera.height,
+			camera.distance * Math.cos(camera.zAngle)];
 		let out = mat4.create();
 		out = mat4.lookAt(out, camTrajectory, camera.center, camera.up);
 		return out;
@@ -316,12 +325,21 @@ let app = ( function() {
 
 		// Translate.
         mat4.translate(mMatrix, mMatrix, model.translate);
+
+		// Rotate
+		mat4.rotateZ(mMatrix, mMatrix, model.rotate[2]);
+		mat4.rotateY(mMatrix, mMatrix, model.rotate[1]);
+		mat4.rotateX(mMatrix, mMatrix, model.rotate[0]);
+
 		// Scale
         mat4.scale(mMatrix, mMatrix, model.scale);
 
 		// Combine view and model matrix
         // by matrix multiplication to mvMatrix.        
         mat4.multiply(mvMatrix, camera.vMatrix, mMatrix);
+
+		// Calculate normal matrix from model-view matrix.
+        mat3.normalFromMat4(model.nMatrix, mvMatrix);
 				
 	}
 
@@ -329,7 +347,7 @@ let app = ( function() {
 		// Setup position VBO.
 		gl.bindBuffer(gl.ARRAY_BUFFER, model.vbo);
 		gl.vertexAttribPointer(prog.positionAttrib,3,gl.FLOAT,false,40,0);
-		//gl.vertexAttribPointer(prog.normalAttrib,3,gl.FLOAT,false,40,12);
+		gl.vertexAttribPointer(prog.normalAttrib,3,gl.FLOAT,false,40,12);
 		gl.vertexAttribPointer(prog.colorAttrib,4,gl.FLOAT,false,40,24);
 
 		// Setup rendering tris.

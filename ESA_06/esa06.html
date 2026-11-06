@@ -12,18 +12,22 @@
 		<script src="app.js"></script>
 		<script type="x-shader/x-vertex" id="vertexshader">
 			attribute vec3 aPosition;
-			// attribute vec3 aNormal;
+			attribute vec3 aNormal;
 			attribute vec4 aColor;
 
 			uniform mat4 uPMatrix;
 			uniform mat4 uMVMatrix;
+			uniform mat3 uNMatrix;
 
 			varying vec4 vColor;
 
 			void main(){
 				gl_Position = uPMatrix * uMVMatrix * vec4(aPosition, 1.0);
+
+				vec3 tNormal = uNMatrix * aNormal;
 	
-				vColor = aColor;
+				vColor = vec4(tNormal.z, tNormal.z, tNormal.z, 1.0);
+				vColor = aColor * (vColor + 1.0) / 2.0;
 			}
 		</script>
 		<script type="x-shader/x-fragment" id="fragmentshader">
