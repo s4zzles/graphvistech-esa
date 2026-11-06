@@ -18,7 +18,7 @@ let app = ( function() {
 		up : [0, 1, 0],
 		// Opening angle given in radian.
 		// radian = degree*2*PI/360.
-		fovy : 50.0 * Math.PI / 180,
+		fovy : 45.0 * Math.PI / 180,
 		// Camera near plane dimensions:
 		// value for left right top bottom in projection.
 		lrtb : 2.0,
@@ -30,10 +30,10 @@ let app = ( function() {
 		projectionType : "perspective",
 		// Angle to Z-Axis for camera when orbiting the center
 		// given in radian.
-		zAngle : 0,
+		zAngle : Math.PI/4,
 		// Distance in XZ-Plane from center when orbiting.
-		distance : 4,
-		height : 2
+		distance : 3.5,
+		height : 1
 	};
 
 	function start() {
@@ -64,7 +64,7 @@ let app = ( function() {
 	 * be in render function.
 	 */
 	function initPipeline() {
-		gl.clearColor(.15, 0, .3, 1);
+		gl.clearColor(0.15, .25, .3, 1);
 
 		// Backface culling.
 		gl.frontFace(gl.CCW);

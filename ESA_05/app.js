@@ -2,6 +2,10 @@ let app = ( function() {
 
 	let gl;
 
+	let minusButton;
+	let plusButton;
+	let recursionLevel;
+
 	// The shader program object is also used to
 	// store attribute and uniform locations.
 	let prog;
@@ -44,6 +48,7 @@ let app = ( function() {
 
 	function init() {
 		initWebGL();
+		initGizmo();
 		initShaderProgram();
 		initUniforms()
 		initModels();
@@ -57,6 +62,21 @@ let app = ( function() {
 		gl = canvas.getContext('experimental-webgl');
 		gl.viewportWidth = canvas.width;
 		gl.viewportHeight = canvas.height;
+	}
+
+	function initGizmo() {
+		minusButton = document.getElementById("minus-button");
+		plusButton = document.getElementById("plus-button");
+		recursionLevel = document.getElementById("recursion-level");
+
+		plusButton.addEventListener("click", () => {
+			updateIcoSphere(1);
+			render();
+		});
+		minusButton.addEventListener("click", () => {
+			updateIcoSphere(-1);
+			render();
+		});
 	}
 
 	/**
@@ -223,21 +243,23 @@ let app = ( function() {
 					break;
 				case('ArrowRight'):
 					deltaAngle = Math.PI * 2 / 180;
-					camera.zAngle -= deltaAngle;
+					camera.zAngle += deltaAngle;
 					camera.zAngle %= Math.PI * 2;
 					break;
 				case('ArrowLeft'):
 					deltaAngle = Math.PI * 2 / 180;
-					camera.zAngle += deltaAngle;
+					camera.zAngle -= deltaAngle;
 					camera.zAngle %= Math.PI * 2;
 					break;
 				case('KeyN'):
 					camera.distance *= 1 - 0.05 * sign;
 					break;
 				case('ArrowUp'):
+					event.preventDefault();
 					camera.height += 0.1;
 					break;
 				case('ArrowDown'):
+					event.preventDefault();
 					camera.height -= 0.1;
 					break;
 				case('NumpadAdd'):
@@ -260,6 +282,7 @@ let app = ( function() {
 		initDataAndBuffers(model, "icosphere", [0.5, icoStep]);
 		model.mvMatrix = mat4.create();
 		models[0] = model;
+		recursionLevel.innerHTML = icoStep;
 	}
 
 	/**
