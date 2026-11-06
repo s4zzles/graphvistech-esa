@@ -30,8 +30,18 @@ main {
     grid-column: 1 / -1;
 }
 
-.formula {
-    font-size: 1rem;
+.recursion-gizmo {
+    display: flex;
+}
+
+#recursion-level {
+    margin: 0.5rem;
+    min-width: 2.5rem;
+    text-align: center;
+}
+
+button {
+    min-width: 2.5rem;
 }
 
 canvas {
