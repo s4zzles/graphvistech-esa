@@ -18,7 +18,7 @@ let app = ( function() {
 		up : [0, 1, 0],
 		// Opening angle given in radian.
 		// radian = degree*2*PI/360.
-		fovy : 45.0 * Math.PI / 180,
+		fovy : 50.0 * Math.PI / 180,
 		// Camera near plane dimensions:
 		// value for left right top bottom in projection.
 		lrtb : 2.0,
@@ -131,11 +131,11 @@ let app = ( function() {
 	}
 
 	function initModels() {
-		createModel("torus", "fill", [0, 0, 0], [0, Math.PI/4, 0], [1, 1, 1], [0.6, 0.1]);
-		createModel("sphere", "fill", [1, 0, 0], [0, 0, 0], [1, 1, 1], [0.2, 0, 1]);
-		createModel("sphere", "fill", [0, 0, 1], [0, 0, 0], [1, 1, 1], [0.2, 1, 0]);
-		createModel("sphere", "fill", [-1, 0, 0], [0, 0, 0], [1, 1, 1], [0.2, 1, 1]);
-		createModel("sphere", "fill", [0, 0, -1], [0, 0, 0], [1, 1, 1], [0.2, 0, 0]);
+		createModel("torus", "fill", [0, 0, 0], [0, 0, 0], [1, 1, 1], [0.5, 0.1]);
+		createModel("sphere", "fill", [0, 0, 0], [0, 0, 0], [1, 1, 1], [0.1, 0, 1]);
+		createModel("sphere", "fill", [0, 0, 0], [0, 0, 0], [1, 1, 1], [0.1, 1, 0]);
+		createModel("sphere", "fill", [0, 0, 0], [0, 0, 0], [1, 1, 1], [0.1, 1, 1]);
+		createModel("sphere", "fill", [0, 0, 0], [0, 0, 0], [1, 1, 1], [0.1, 0, 0]);
 		createModel("plane", "wireframe", [0, -0.75, 0], [0, 0, 0], [1, 1, 1]);
 	}
 
@@ -148,6 +148,7 @@ let app = ( function() {
     function createModel(geometryname, fillstyle, translate, rotate, scale, varArray) {
 		let model = {};
 		model.fillstyle = fillstyle;
+		model.geometryname = geometryname;
 		initDataAndBuffers(model, geometryname, varArray);
 		initTransformations(model, translate, rotate, scale);
 
@@ -160,6 +161,7 @@ let app = ( function() {
 		model.translate = translate;
 		model.rotate = rotate;
 		model.scale = scale;
+		model.orbitAngle = 0;
 
 		// Create and initialize Model-Matrix.
 		model.mMatrix = mat4.create();
@@ -252,6 +254,9 @@ let app = ( function() {
 				case('ArrowDown'):
 					camera.height -= 0.1;
 					break;
+				case('KeyA'):
+					advanceAnimation();
+					break;
 			}
 
 			// Render the scene again on any key pressed.
@@ -259,11 +264,41 @@ let app = ( function() {
 		};
 	}
 
+	function advanceAnimation() {
+
+	}
+
+	function rotateBody(model, degree) {
+		let rotY = model.rotate[1];
+		let deltaRot = (Math.PI * 2 / 360) * degree;
+		rotY = (rotY + deltaRot) % (Math.PI * 2);
+		model.rotate[1] = rotY;
+	}
+
+	function orbitBody(model, center, radius, offset, degree) {
+		let orbitAngle = model.orbitAngle;
+		let delta = (Math.PI * 2 / 360) * degree;
+		orbitAngle = (orbitAngle + delta) % (Math.PI * 2);
+
+
+		// orbit on XZ plane in local space
+		model.translate = [
+			radius * Math.cos(orbitAngle + offset), 
+			0, 
+			radius * Math.sin(orbitAngle + offset)
+		];
+
+		// add center array to translate
+		model.translate = model.translate.map((value, i) => value + center[i]);
+
+		model.orbitAngle = orbitAngle;
+	}
+
 
 	/**
 	 * Run the rendering pipeline.
 	 */
-	function render() {
+	function render(animate) {
 		// Clear framebuffer and depth-/z-buffer.
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -274,6 +309,25 @@ let app = ( function() {
 		// Loop over models.
 		for(let i = 0; i < models.length; i++) {
 			// Update modelview for model.
+			if(models[i].geometryname === 'torus') {
+				rotateBody(models[i], 5);
+			}
+			else if(models[i].geometryname === 'sphere') {
+				switch(i) {
+					case 1:
+						orbitBody(models[i], [-0.5,0,0], 0.6, 0, -5);
+						break;
+					case 2:
+						orbitBody(models[i], [0.5,0,0], 0.6, 0, -5);
+						break;
+					case 3:
+						orbitBody(models[i], [0,0,0.5], 0.6, Math.PI, -5);
+						break;
+					case 4:
+						orbitBody(models[i], [0,0,-0.5], 0.6, Math.PI, -5);
+						break;
+				}
+			}
 			updateTransformations(models[i]);
 
 			// Set uniforms for model.
@@ -318,6 +372,7 @@ let app = ( function() {
 		// Use shortcut variables.
 		var mMatrix = model.mMatrix;
 		var mvMatrix = model.mvMatrix;
+		let nMatrix = model.nMatrix;
 
 		// Reset matrices to identity.         
         mat4.identity(mMatrix);
@@ -339,7 +394,7 @@ let app = ( function() {
         mat4.multiply(mvMatrix, camera.vMatrix, mMatrix);
 
 		// Calculate normal matrix from model-view matrix.
-        mat3.normalFromMat4(model.nMatrix, mvMatrix);
+        mat3.normalFromMat4(nMatrix, mvMatrix);
 				
 	}
 
