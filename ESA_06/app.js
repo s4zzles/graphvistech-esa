@@ -5,7 +5,6 @@ let app = ( function() {
 	// The shader program object is also used to
 	// store attribute and uniform locations.
 	let prog;
-	let icoStep = 0;
 
 	// Array of model objects.
 	let models = [];
@@ -48,7 +47,7 @@ let app = ( function() {
 		initUniforms()
 		initModels();
 		initEventHandler();
-		initPipline();
+		initPipeline();
 	}
 
 	function initWebGL() {
@@ -64,7 +63,7 @@ let app = ( function() {
 	 * If projection or viewport change, their setup must
 	 * be in render function.
 	 */
-	function initPipline() {
+	function initPipeline() {
 		gl.clearColor(.15, 0, .3, 1);
 
 		// Backface culling.
@@ -129,15 +128,12 @@ let app = ( function() {
 	}
 
 	function initModels() {
-
-		createModel("torus", "fill", [1, 0.12]);
-		createModel("sphere", "fill", [0.2, 0, 1]);
-		createModel("sphere", "fill", [0.2, 1, 0]);
-		createModel("sphere", "fill", [0.2, 1, 1]);
-		createModel("sphere", "fill", [0.2, 0, 0]);
-		createModel("plane", "wireframe");
-
-		
+		createModel("torus", "fill", [0, 0, 0], [0, 0, 0], [1, 1, 1], [0.6, 0.1]);
+		createModel("sphere", "fill", [1, 0, 0], [0, 0, 0], [1, 1, 1], [0.2, 0, 1]);
+		createModel("sphere", "fill", [0, 0, 1], [0, 0, 0], [1, 1, 1], [0.2, 1, 0]);
+		createModel("sphere", "fill", [-1, 0, 0], [0, 0, 0], [1, 1, 1], [0.2, 1, 1]);
+		createModel("sphere", "fill", [0, 0, -1], [0, 0, 0], [1, 1, 1], [0.2, 0, 0]);
+		createModel("plane", "wireframe", [0, -0.75, 0], [0, 0, 0], [1, 1, 1]);
 	}
 
 	/**
@@ -146,15 +142,29 @@ let app = ( function() {
 	 * @parameter geometryname: string with name of geometry.
 	 * @parameter fillstyle: wireframe, fill, fillwireframe.
 	 */
-    function createModel(geometryname, fillstyle, varArray) {
+    function createModel(geometryname, fillstyle, translate, rotate, scale, varArray) {
 		let model = {};
 		model.fillstyle = fillstyle;
 		initDataAndBuffers(model, geometryname, varArray);
-		// Create and initialize Model-View-Matrix.
-		model.mvMatrix = mat4.create();
+		initTransformations(model, translate, rotate, scale);
+
 
 		models.push(model);
 	}
+
+	function initTransformations(model, translate, rotate, scale) {
+		// Store transformation vectors.
+		model.translate = translate;
+		model.rotate = rotate;
+		model.scale = scale;
+
+		// Create and initialize Model-Matrix.
+		model.mMatrix = mat4.create();
+
+		// Create and initialize Model-View-Matrix.
+		model.mvMatrix = mat4.create();
+	}
+
 
 	/**
 	 * Init data and buffers for model object.
@@ -236,12 +246,6 @@ let app = ( function() {
 				case('ArrowDown'):
 					camera.height -= 0.1;
 					break;
-				case('NumpadAdd'):
-					updateIcoSphere(1);
-					break;
-				case('NumpadSubtract'):
-					updateIcoSphere(-1);
-					break;
 			}
 
 			// Render the scene again on any key pressed.
@@ -249,14 +253,6 @@ let app = ( function() {
 		};
 	}
 
-	function updateIcoSphere(stepDirection) {
-		icoStep = Math.max(Math.min(icoStep + stepDirection, 5), 0);
-		var model = {};
-		model.fillstyle = "fillwireframe";
-		initDataAndBuffers(model, "icosphere", [0.5, icoStep]);
-		model.mvMatrix = mat4.create();
-		models[0] = model;
-	}
 
 	/**
 	 * Run the rendering pipeline.
@@ -272,7 +268,7 @@ let app = ( function() {
 		// Loop over models.
 		for(let i = 0; i < models.length; i++) {
 			// Update modelview for model.
-			mat4.copy(models[i].mvMatrix, camera.vMatrix);
+			updateTransformations(models[i]);
 
 			// Set uniforms for model.
 			gl.uniformMatrix4fv(prog.mvMatrixUniform, false,
@@ -305,6 +301,30 @@ let app = ( function() {
 		gl.uniformMatrix4fv(prog.pMatrixUniform, false, camera.pMatrix);
 	}
 
+	/**
+	 * Update model-view matrix for model.
+	 */
+	function updateTransformations(model) {
+	
+		// Use shortcut variables.
+		var mMatrix = model.mMatrix;
+		var mvMatrix = model.mvMatrix;
+
+		// Reset matrices to identity.         
+        mat4.identity(mMatrix);
+        mat4.identity(mvMatrix);
+
+		// Translate.
+        mat4.translate(mMatrix, mMatrix, model.translate);
+		// Scale
+        mat4.scale(mMatrix, mMatrix, model.scale);
+
+		// Combine view and model matrix
+        // by matrix multiplication to mvMatrix.        
+        mat4.multiply(mvMatrix, camera.vMatrix, mMatrix);
+				
+	}
+
 	function draw(model) {
 		// Setup position VBO.
 		gl.bindBuffer(gl.ARRAY_BUFFER, model.vbo);
@@ -325,7 +345,7 @@ let app = ( function() {
 		let wireframe = (model.fillstyle.search(/wireframe/) != -1);
 		if(wireframe) {
 			gl.disableVertexAttribArray(prog.colorAttrib);
-			gl.vertexAttrib4f(prog.colorAttrib, 1,1,1,1);
+			gl.vertexAttrib4f(prog.colorAttrib, 0.6,1,0.6,1);
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.iboLines);
 			gl.drawElements(gl.LINES, model.iboLines.numberOfElements,
 				gl.UNSIGNED_SHORT, 0);
