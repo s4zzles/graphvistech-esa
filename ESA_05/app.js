@@ -223,12 +223,12 @@ let app = ( function() {
 					break;
 				case('ArrowRight'):
 					deltaAngle = Math.PI * 2 / 180;
-					camera.zAngle += deltaAngle;
+					camera.zAngle -= deltaAngle;
 					camera.zAngle %= Math.PI * 2;
 					break;
 				case('ArrowLeft'):
 					deltaAngle = Math.PI * 2 / 180;
-					camera.zAngle -= deltaAngle;
+					camera.zAngle += deltaAngle;
 					camera.zAngle %= Math.PI * 2;
 					break;
 				case('KeyN'):
@@ -287,8 +287,8 @@ let app = ( function() {
 	}
 
 	function calculateCameraOrbit() {
-		let camTrajectory = [camera.distance * Math.cos(camera.zAngle), camera.height,
-			camera.distance * Math.sin(camera.zAngle)];
+		let camTrajectory = [camera.distance * Math.sin(camera.zAngle), camera.height,
+			camera.distance * Math.cos(camera.zAngle)];
 		let out = mat4.create();
 		out = mat4.lookAt(out, camTrajectory, camera.center, camera.up);
 		return out;
