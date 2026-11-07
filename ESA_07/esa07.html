@@ -1,0 +1,64 @@
+<!DOCTYPE html5>
+<html lang="de">
+	<head>
+		<style>
+        @import url('https://fonts.googleapis.com/css2?family=Merriweather+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+        </style>
+		<meta charset="UTF-8">
+		<link rel="stylesheet" href="style.css">
+		<title>ESA07: Z-Buffer Visualisierung</title>
+		<script src="../src/gl-matrix.js"></script>
+		<script src="vertexData.js"></script>
+		<script src="app.js"></script>
+		<script type="x-shader/x-vertex" id="vertexshader">
+			attribute vec3 aPosition;
+			attribute vec3 aNormal;
+			attribute vec4 aColor;
+
+			uniform mat4 uPMatrix;
+			uniform mat4 uMVMatrix;
+			uniform mat3 uNMatrix;
+
+			varying vec4 vColor;
+
+			void main(){
+				gl_Position = uPMatrix * uMVMatrix * vec4(aPosition, 1.0);
+
+				vec3 tNormal = uNMatrix * aNormal;
+	
+				vColor = vec4(tNormal.z, tNormal.z, tNormal.z, 1.0);
+				vColor = max((vColor + 1.0) / 2.0, vec4(0.3)); // soften the max darkness of shading
+				vColor = aColor * vColor;
+			}
+		</script>
+		<script type="x-shader/x-fragment" id="fragmentshader">
+			precision mediump float;
+			varying vec4 vColor;
+
+			void main() {
+				gl_FragColor = vColor;
+			}
+		</script>
+	</head>
+	<body onload="app.start()">
+		<main>
+			<h1>ESA07: Z-Buffer Visualisierung</h1>
+			<canvas id="canvas" width="700" height="700"></canvas>
+			<p>Altar im Nebelwald</p>
+			<h2>Interaktionen:</h2>
+			<div class="instructions">
+				<p>Linke / rechte Pfeiltaste: Kamera mit / entgegen dem Uhrzeigersinn bewegen</p>
+				<p>Obere / untere Pfeiltaste: Kamerahöhe hoch / runter</p>
+				<p></p>
+				<p>N / Shift + N: Kameradistanz zur Mitte verringern / vergrößern</p>
+				<p>O / P: Perspective-Mode oder Orthographic-Mode umschalten</p>
+			</div>			
+            <a id="back" href="../index.html">Zurück zur Übersicht</a>
+			<footer>
+                <p>Diese Seite ist im Zuge des VFH-Kurses "Graphical Visualisation Technologies" entstanden.</p>
+                <p>Erstellt von Philipp Becker</p>
+            </footer>
+		</main>
+		
+	</body>
+</html>
