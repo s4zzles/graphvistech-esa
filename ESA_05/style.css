@@ -32,12 +32,18 @@ main {
 
 .recursion-gizmo {
     display: flex;
+    margin-bottom: 1.5rem;
 }
 
 #recursion-level {
     margin: 0.5rem;
     min-width: 2.5rem;
     text-align: center;
+}
+
+.instructions p {
+        margin: 0;
+        margin-bottom: 0.5rem;
 }
 
 button {

@@ -38,7 +38,7 @@ let app = ( function() {
 
 	function start() {
 		init();
-		render();
+		render(true, 1); // animate parameter is true so the first frame is correctly rendered
 	}
 
 	function init() {
@@ -225,6 +225,7 @@ let app = ( function() {
 
 		window.onkeydown = function(event) {
 			let sign = event.shiftKey ? -1 : 1;
+			let animate = false;
 
 			// Change projection of scene.
 			switch(event.code) {
@@ -237,47 +238,45 @@ let app = ( function() {
 					break;
 				case('ArrowRight'):
 					deltaAngle = Math.PI * 2 / 180;
-					camera.zAngle -= deltaAngle;
+					camera.zAngle += deltaAngle;
 					camera.zAngle %= Math.PI * 2;
 					break;
 				case('ArrowLeft'):
 					deltaAngle = Math.PI * 2 / 180;
-					camera.zAngle += deltaAngle;
+					camera.zAngle -= deltaAngle;
 					camera.zAngle %= Math.PI * 2;
 					break;
 				case('KeyN'):
 					camera.distance *= 1 - 0.05 * sign;
 					break;
 				case('ArrowUp'):
+					event.preventDefault();
 					camera.height += 0.1;
 					break;
 				case('ArrowDown'):
+					event.preventDefault();
 					camera.height -= 0.1;
 					break;
-				case('KeyA'):
-					advanceAnimation();
+				case('KeyK'):
+					animate = true;
 					break;
 			}
 
 			// Render the scene again on any key pressed.
-			render();
+			render(animate, sign);
 		};
 	}
 
-	function advanceAnimation() {
-
-	}
-
-	function rotateBody(model, degree) {
+	function rotateBody(model, degree, sign) {
 		let rotY = model.rotate[1];
-		let deltaRot = (Math.PI * 2 / 360) * degree;
+		let deltaRot = (Math.PI * 2 / 360) * degree  * sign;
 		rotY = (rotY + deltaRot) % (Math.PI * 2);
 		model.rotate[1] = rotY;
 	}
 
-	function orbitBody(model, center, radius, offset, degree) {
+	function orbitBody(model, center, radius, offset, degree, sign) {
 		let orbitAngle = model.orbitAngle;
-		let delta = (Math.PI * 2 / 360) * degree;
+		let delta = (Math.PI * 2 / 360) * degree * sign;
 		orbitAngle = (orbitAngle + delta) % (Math.PI * 2);
 
 
@@ -298,7 +297,7 @@ let app = ( function() {
 	/**
 	 * Run the rendering pipeline.
 	 */
-	function render(animate) {
+	function render(animate, sign) {
 		// Clear framebuffer and depth-/z-buffer.
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -308,26 +307,31 @@ let app = ( function() {
 
 		// Loop over models.
 		for(let i = 0; i < models.length; i++) {
-			// Update modelview for model.
-			if(models[i].geometryname === 'torus') {
-				rotateBody(models[i], 5);
-			}
-			else if(models[i].geometryname === 'sphere') {
-				switch(i) {
-					case 1:
-						orbitBody(models[i], [-0.5,0,0], 0.6, 0, -5);
-						break;
-					case 2:
-						orbitBody(models[i], [0.5,0,0], 0.6, 0, -5);
-						break;
-					case 3:
-						orbitBody(models[i], [0,0,0.5], 0.6, Math.PI, -5);
-						break;
-					case 4:
-						orbitBody(models[i], [0,0,-0.5], 0.6, Math.PI, -5);
-						break;
+
+			// update translate/rotation for animation frames
+			if(animate) {
+				if(models[i].geometryname === 'torus') {
+				rotateBody(models[i], 5, sign);
+				}
+				else if(models[i].geometryname === 'sphere') {
+					switch(i) {
+						case 1:
+							orbitBody(models[i], [-0.5,0,0], 0.6, 0, -5, sign);
+							break;
+						case 2:
+							orbitBody(models[i], [0.5,0,0], 0.6, 0, -5, sign);
+							break;
+						case 3:
+							orbitBody(models[i], [0,0,0.5], 0.6, Math.PI, -5, sign);
+							break;
+						case 4:
+							orbitBody(models[i], [0,0,-0.5], 0.6, Math.PI, -5, sign);
+							break;
+					}
 				}
 			}
+			
+			// Update modelview for model.
 			updateTransformations(models[i]);
 
 			// Set uniforms for model.

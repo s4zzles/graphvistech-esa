@@ -30,8 +30,9 @@ main {
     grid-column: 1 / -1;
 }
 
-.formula {
-    font-size: 1rem;
+.instructions p {
+        margin: 0;
+        margin-bottom: 0.5rem;
 }
 
 canvas {
