@@ -5,6 +5,11 @@ let app = ( function() {
 	// The shader program object is also used to
 	// store attribute and uniform locations.
 	let prog;
+	let progNormal;
+	let progZBuffer;
+	let progFog;
+
+	let shaderSwitch = 0;
 
 	// Array of model objects.
 	let models = [];
@@ -32,7 +37,7 @@ let app = ( function() {
 		// given in radian.
 		zAngle : 0.25,
 		// Distance in XZ-Plane from center when orbiting.
-		distance : 2,
+		distance : 1.5,
 		height : 0.5
 	};
 
@@ -64,7 +69,7 @@ let app = ( function() {
 	 * be in render function.
 	 */
 	function initPipeline() {
-		gl.clearColor(0.1, .1, .25, 1);
+		gl.clearColor(0.1, 0.1, 0.25, 1.0);
 
 		// Backface culling.
 		gl.frontFace(gl.CCW);
@@ -87,17 +92,42 @@ let app = ( function() {
 	}
 
 	function initShaderProgram() {
-		// Init vertex shader.
+
+		// Vertex shader
 		let vs = initShader(gl.VERTEX_SHADER, "vertexshader");
-		// Init fragment shader.
-		let fs = initShader(gl.FRAGMENT_SHADER, "fragmentshader");
-		// Link shader into a shader program.
-		prog = gl.createProgram();
-		gl.attachShader(prog, vs);
-		gl.attachShader(prog, fs);
-		gl.bindAttribLocation(prog, 0, "aPosition");
-		gl.linkProgram(prog);
+
+		// Fragment shaders
+		let fsNormal = initShader(gl.FRAGMENT_SHADER, "fragmentshader-normal");
+		let fsZBuffer = initShader(gl.FRAGMENT_SHADER, "fragmentshader-zbuffer");
+		let fsFog = initShader(gl.FRAGMENT_SHADER, "fragmentshader-fog");
+
+		// Create programs
+		progNormal = createProgram(vs, fsNormal);
+		progZBuffer = createProgram(vs, fsZBuffer);
+		progFog = createProgram(vs, fsFog);
+
+		// Set initial program
+		prog = progZBuffer;
 		gl.useProgram(prog);
+	}
+
+	function createProgram(vs, fs) {
+
+		let program = gl.createProgram();
+
+		gl.attachShader(program, vs);
+		gl.attachShader(program, fs);
+
+		gl.bindAttribLocation(program, 0, "aPosition");
+
+		gl.linkProgram(program);
+
+		if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+			console.log(gl.getProgramInfoLog(program));
+			return null;
+		}
+
+		return program;
 	}
 
 	/**
@@ -193,6 +223,26 @@ let app = ( function() {
 		model.nMatrix = mat3.create();
 	}
 
+	function switchShader(newProgram) {
+
+		prog = newProgram;
+
+		gl.useProgram(prog);
+
+		initUniforms();
+		initAttributes();
+
+		render();
+	}
+
+	function initAttributes() {
+
+		prog.positionAttrib = gl.getAttribLocation(prog, 'aPosition');
+		prog.normalAttrib = gl.getAttribLocation(prog, 'aNormal');
+		prog.colorAttrib = gl.getAttribLocation(prog, 'aColor');
+
+	}
+
 
 	/**
 	 * Init data and buffers for model object.
@@ -277,6 +327,21 @@ let app = ( function() {
 					event.preventDefault();
 					camera.height -= 0.1;
 					break;
+				case('KeyF'):
+					shaderSwitch++;
+					shaderSwitch %= 3;
+					switch(shaderSwitch) {
+						case 0:
+							switchShader(progZBuffer);
+							break;
+						case 1:
+							switchShader(progNormal);
+							break;
+						case 2:
+							switchShader(progFog);
+							break;
+					}
+					break;
 			}
 
 			// Render the scene again on any key pressed.
@@ -355,7 +420,7 @@ let app = ( function() {
 				mat4.ortho(camera.pMatrix, -v, v, -v, v, -10, 10);
 				break;
 			case("perspective"):
-				mat4.perspective(camera.pMatrix, camera.fovy, 1, 0.1, 10);
+				mat4.perspective(camera.pMatrix, camera.fovy, 1, 0.5, 10);
 				break;
 		}
 		// Set projection uniform.

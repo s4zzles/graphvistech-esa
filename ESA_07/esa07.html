@@ -31,12 +31,35 @@
 				vColor = aColor * vColor;
 			}
 		</script>
-		<script type="x-shader/x-fragment" id="fragmentshader">
+		<script type="x-shader/x-fragment" id="fragmentshader-zbuffer">
+			precision mediump float;
+			varying vec4 vColor;
+
+			void main() {
+				vec4 zBuffer = vec4(gl_FragCoord.z, gl_FragCoord.z, gl_FragCoord.z, 1.0);
+				gl_FragColor = zBuffer;
+			}
+		</script>
+		<script type="x-shader/x-fragment" id="fragmentshader-normal">
 			precision mediump float;
 			varying vec4 vColor;
 
 			void main() {
 				gl_FragColor = vColor;
+			}
+		</script>
+		<script type="x-shader/x-fragment" id="fragmentshader-fog">
+			precision mediump float;
+			varying vec4 vColor;
+
+			void main() {
+
+				vec4 fogColor = vec4(.1, .1, .25, 1.);
+
+				vec4 zBuffer = vec4(gl_FragCoord.z, gl_FragCoord.z, gl_FragCoord.z, 1.0);
+
+				vec4 fog = mix(vColor, fogColor, zBuffer);
+				gl_FragColor = fog;
 			}
 		</script>
 	</head>
@@ -49,7 +72,7 @@
 			<div class="instructions">
 				<p>Linke / rechte Pfeiltaste: Kamera mit / entgegen dem Uhrzeigersinn bewegen</p>
 				<p>Obere / untere Pfeiltaste: Kamerahöhe hoch / runter</p>
-				<p></p>
+				<p>F: Schaltet zwischen ZBuffer-, Normal- und Nebel-Shader um</p>
 				<p>N / Shift + N: Kameradistanz zur Mitte verringern / vergrößern</p>
 				<p>O / P: Perspective-Mode oder Orthographic-Mode umschalten</p>
 			</div>			
