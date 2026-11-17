@@ -573,12 +573,13 @@ var icosphere = ( function() {
 
     function createVertexData(radius = 1, depth = 2) {
 
+		// create empty arrays (will get converted into typed arrays)
         let vertices = [];
         let indicesTris = [];
         let indicesLines = [];
 
-        // Normalize a vector and project it onto the sphere.
-        function normalize(v) {
+        // Normalize vector and project it onto the sphere
+        function sphereProject(v) {
             let len = Math.sqrt(
                 v[0] * v[0] +
                 v[1] * v[1] +
@@ -596,7 +597,7 @@ var icosphere = ( function() {
         function addVertex(v) {
             let index = vertices.length / 10;
 
-            let [x,y,z] = normalize(v);
+            let [x,y,z] = sphereProject(v);
 
 			// position
             vertices.push(x, y, z);
@@ -608,7 +609,7 @@ var icosphere = ( function() {
 
             vertices.push(nx, ny, nz);
 
-			// vertex color
+			// vertex color (visualize normals)
 			vertices.push(
 				nx + 1 / 2,
                 ny + 1 / 2,
@@ -621,14 +622,14 @@ var icosphere = ( function() {
 
         // Calculate midpoint of two vertices.
         function midpoint(a, b) {
-            return normalize([
+            return sphereProject([
                 (a[0] + b[0]) / 2,
                 (a[1] + b[1]) / 2,
                 (a[2] + b[2]) / 2
             ]);
         }
 
-        // Recursively subdivide a triangle.
+        // Recursive triangle subdivision
         function subdivide(a, b, c, level) {
 
             if (level === 0) {
@@ -648,17 +649,19 @@ var icosphere = ( function() {
                 return;
             }
 
+			// get midpoints of edges to create new tri
             let ab = midpoint(a, b);
             let bc = midpoint(b, c);
             let ca = midpoint(c, a);
 
+			// call subdivide for 4 new tris
             subdivide(a, ab, ca, level - 1);
             subdivide(ab, b, bc, level - 1);
             subdivide(ca, bc, c, level - 1);
             subdivide(ab, bc, ca, level - 1);
         }
 
-        // Initial octahedron vertices.
+        // Initial octahedron vertices
         let top    = [0, 1, 0];
         let bottom = [0, -1, 0];
 
@@ -668,7 +671,7 @@ var icosphere = ( function() {
         let left   = [-1, 0, 0];
         let right  = [1, 0, 0];
 
-        // Eight initial triangles.
+        // initial triangles
         let faces = [
             [top, front, right],
             [top, left, front],
@@ -686,7 +689,7 @@ var icosphere = ( function() {
             subdivide(face[0], face[1], face[2], depth);
         }
 
-        // Convert arrays into typed arrays.
+        // Convert arrays into typed arrays
         this.vertices = new Float32Array(vertices);
         this.indicesTris = new Uint16Array(indicesTris);
         this.indicesLines = new Uint16Array(indicesLines);
