@@ -1,7 +1,7 @@
 var torus = ( function() {
 
 	function createVertexData(outerRadius = 1.2, innerRadius = 0.18) {
-		let n = 12;
+		let n = 16;
 		let m = 32;
 
 		// Position, normal, vertexcolor
@@ -50,10 +50,10 @@ var torus = ( function() {
 				vertices[iVertex * 10 + 4] = ny;
 				vertices[iVertex * 10 + 5] = nz;
 
-				// Set vertex color
-				vertices[iVertex * 10 + 6] = Math.max(Math.cos(u), 0);
-				vertices[iVertex * 10 + 7] = 0.25;
-				vertices[iVertex * 10 + 8] = Math.max(-Math.cos(u), 0);
+				// Set vertex color (unused)
+				vertices[iVertex * 10 + 6] = 1;
+				vertices[iVertex * 10 + 7] = 1;
+				vertices[iVertex * 10 + 8] = 1;
 				vertices[iVertex * 10 + 9] = 1;
 
 
@@ -148,7 +148,7 @@ var plane = ( function() {
 				vertices[iVertex * 10 + 4] = ny;
 				vertices[iVertex * 10 + 5] = nz;
 
-				// set vertex color
+				// set vertex color (unused)
 				vertices[iVertex * 10 + 6] = 0;
 				vertices[iVertex * 10 + 7] = 0;
 				vertices[iVertex * 10 + 8] = 0;
@@ -189,7 +189,7 @@ var plane = ( function() {
 
 var sphere = ( function() {
 
-	function createVertexData(radius = 1, red = 0, blue = 0) {
+	function createVertexData(radius = 1) {
 		let n = 24; // circle verts
 		let m = 12; // line verts
 
@@ -238,10 +238,10 @@ var sphere = ( function() {
 				vertices[iVertex * 10 + 4] = ny;
 				vertices[iVertex * 10 + 5] = nz;
 
-				// set vertex color
-				vertices[iVertex * 10 + 6] = red;
-				vertices[iVertex * 10 + 7] = Math.cos(12 * v);
-				vertices[iVertex * 10 + 8] = blue;
+				// set vertex color (unused)
+				vertices[iVertex * 10 + 6] = 1;
+				vertices[iVertex * 10 + 7] = 1;
+				vertices[iVertex * 10 + 8] = 1;
 				vertices[iVertex * 10 + 9] = 1;
 
 

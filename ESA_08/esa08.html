@@ -17,8 +17,7 @@
 			uniform mat4 uPMatrix;
 			uniform mat4 uMVMatrix;
 			uniform mat3 uNMatrix;
-			
-			//uniform vec4 uColor;
+
 			varying vec4 vColor;
 						
 			// Ambient light.
@@ -45,8 +44,17 @@
 			// Phong illumination for single light source,
 			// no ambient light.
 			vec3 phong(vec3 p, vec3 n, vec3 v, LightSource l) {
+
+				vec3 sj = normalize(l.position - p);
+				vec3 rj = 2. * dot(sj, n) * n - sj; // reflect
 			
-				return vec3(0.0);
+				// Calculate diffuse light
+				vec3 dl = material.kd * l.color * max(dot(n, sj), 0.);
+
+				// Calculate specular light
+				vec3 sl = material.ks * l.color * pow(max(dot(rj, v), 0.), material.ke);
+
+				return dl + sl;
 			}
 			
 			// Phong illumination for multiple light sources

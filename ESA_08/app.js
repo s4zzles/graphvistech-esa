@@ -30,7 +30,7 @@ let app = ( function() {
 		projectionType : "perspective",
 		// Angle to Z-Axis for camera when orbiting the center
 		// given in radian.
-		zAngle : Math.PI/4,
+		zAngle : 0,
 		// Distance in XZ-Plane from center when orbiting.
 		distance : 3.5,
 		height : 1
@@ -41,9 +41,15 @@ let app = ( function() {
         ambientLight : [ .5, .5, .5 ],
         light : [ {
             isOn : true,
-            position : [ 3., 1., 3. ],
-            color : [ 1., 1., 1. ]
-        }, ]
+            position : [ 2., 1., 0.5],
+            color : [ .5, .5, .5]
+        },
+		{
+			isOn : true,
+			position : [0, -2, 0],
+			color : [0, 0, 0.5]
+		},
+		]
     };
 
 	function start() {
@@ -186,12 +192,12 @@ let app = ( function() {
 		// Create some default material.
         let mDefault = createPhongMaterial();
 
-		createModel("torus", "fill", [0, 0, 0], [0, 0, 0], [1, 1, 1], [0.5, 0.1], mDefault);
-		createModel("sphere", "fill", [0, 0, 0], [0, 0, 0], [1, 1, 1], [0.1, 0, 1], mDefault);
-		createModel("sphere", "fill", [0, 0, 0], [0, 0, 0], [1, 1, 1], [0.1, 1, 0], mDefault);
-		createModel("sphere", "fill", [0, 0, 0], [0, 0, 0], [1, 1, 1], [0.1, 1, 1], mDefault);
-		createModel("sphere", "fill", [0, 0, 0], [0, 0, 0], [1, 1, 1], [0.1, 0, 0], mDefault);
-		// createModel("plane", "wireframe", [0, -0.75, 0], [0, 0, 0], [1, 1, 1], mDefault);
+		createModel("torus", "fill", [0, 0, 0], [0, 0, 0], [1, 1, 1], [0.5, 0.2], mDefault);
+		createModel("sphere", "fill", [0, 0, 0], [0, 0, 0], [1, 1, 1], [0.1], mDefault);
+		createModel("sphere", "fill", [0, 0, 0], [0, 0, 0], [1, 1, 1], [0.15], mDefault);
+		createModel("sphere", "fill", [0, 0, 0], [0, 0, 0], [1, 1, 1], [0.2], mDefault);
+		createModel("sphere", "fill", [0, 0, 0], [0, 0, 0], [1, 1, 1], [0.25], mDefault);
+		createModel("plane", "wireframe", [0, -0.75, 0], [0, 0, 0], [1, 1, 1]);
 	}
 
 	/**
@@ -326,13 +332,6 @@ let app = ( function() {
 	}
 
 	// use this for light rotations
-	function rotateBody(model, degree, sign) {
-		let rotY = model.rotate[1];
-		let deltaRot = (Math.PI * 2 / 360) * degree  * sign;
-		rotY = (rotY + deltaRot) % (Math.PI * 2);
-		model.rotate[1] = rotY;
-	}
-
 	function orbitBody(model, center, radius, offset, degree, sign) {
 		let orbitAngle = model.orbitAngle;
 		let delta = (Math.PI * 2 / 360) * degree * sign;
@@ -390,10 +389,7 @@ let app = ( function() {
 
 			// update translate/rotation for animation frames
 			if(animate) {
-				if(models[i].geometryname === 'torus') {
-				rotateBody(models[i], 5, sign);
-				}
-				else if(models[i].geometryname === 'sphere') {
+				if(models[i].geometryname === 'sphere') {
 					switch(i) {
 						case 1:
 							orbitBody(models[i], [-0.5,0,0], 0.6, 0, -5, sign);
@@ -423,10 +419,13 @@ let app = ( function() {
 
 			// NEW
 			// Material.
-            gl.uniform3fv(prog.materialKaUniform, models[i].material.ka);
-            gl.uniform3fv(prog.materialKdUniform, models[i].material.kd);
-            gl.uniform3fv(prog.materialKsUniform, models[i].material.ks);
-            gl.uniform1f(prog.materialKeUniform, models[i].material.ke);
+			if (models[i].fillstyle === "fill") {
+				gl.uniform3fv(prog.materialKaUniform, models[i].material.ka);
+				gl.uniform3fv(prog.materialKdUniform, models[i].material.kd);
+				gl.uniform3fv(prog.materialKsUniform, models[i].material.ks);
+				gl.uniform1f(prog.materialKeUniform, models[i].material.ke);
+			}
+            
 			
 			draw(models[i]);
 		}
