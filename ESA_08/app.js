@@ -42,19 +42,19 @@ let app = ( function() {
         light : [ {
             isOn : true,
             position : [ 2., 1., 0.5],
-            color : [ .5, .5, .5]
+            color : [ .75, .75, .75]
         },
 		{
 			isOn : true,
 			position : [0, -2, 0],
-			color : [0, 0, 0.5]
+			color : [0, 0.8, 0.8]
 		},
 		]
     };
 
 	function start() {
 		init();
-		render(true, 1); // animate parameter is true so the first frame is correctly rendered
+		render(false, 1);
 	}
 
 	function init() {
@@ -145,9 +145,6 @@ let app = ( function() {
 		// Normal-Matrix
 		prog.nMatrixUniform = gl.getUniformLocation(prog, "uNMatrix");
 
-		// Color.
-        prog.colorUniform = gl.getUniformLocation(prog, "uColor");
-
         // Light.
         prog.ambientLightUniform = gl.getUniformLocation(prog,
                 "ambientLight");
@@ -192,12 +189,22 @@ let app = ( function() {
 		// Create some default material.
         let mDefault = createPhongMaterial();
 
-		createModel("torus", "fill", [0, 0, 0], [0, 0, 0], [1, 1, 1], [0.5, 0.2], mDefault);
-		createModel("sphere", "fill", [0, 0, 0], [0, 0, 0], [1, 1, 1], [0.1], mDefault);
-		createModel("sphere", "fill", [0, 0, 0], [0, 0, 0], [1, 1, 1], [0.15], mDefault);
-		createModel("sphere", "fill", [0, 0, 0], [0, 0, 0], [1, 1, 1], [0.2], mDefault);
-		createModel("sphere", "fill", [0, 0, 0], [0, 0, 0], [1, 1, 1], [0.25], mDefault);
-		createModel("plane", "wireframe", [0, -0.75, 0], [0, 0, 0], [1, 1, 1]);
+		let mRed = createPhongMaterial({kd: [ 1., 0., 0. ]});
+		let mGreen = createPhongMaterial({kd: [ 0., 1., 0. ]});
+		let mBlue = createPhongMaterial({kd: [ 0., 0., 1. ]});
+		let mPink = createPhongMaterial({kd: [ 1., 0., 1. ]});
+		let mYellow = createPhongMaterial({kd: [ 1., 1., 0. ]});
+		let mAqua = createPhongMaterial({kd: [ 0., 1., 1. ]});
+
+
+
+
+		createModel("torus", "fill", [0, 0, 0], [0, 0, 0], [1, 1, 1], [0.5, 0.2], mRed);
+		createModel("sphere", "fill", [1, 0, 0], [0, 0, 0], [1, 1, 1], [0.1], mGreen);
+		createModel("sphere", "fill", [-1, 0, 0], [0, 0, 0], [1, 1, 1], [0.15], mBlue);
+		createModel("sphere", "fill", [0, -1, 0], [0, 0, 0], [1, 1, 1], [0.2], mPink);
+		createModel("sphere", "fill", [0, 1, 0], [0, 0, 0], [1, 1, 1], [0.25], mYellow);
+		createModel("plane", "wireframe", [0, -1, 0], [0, 0, 0], [1, 1, 1], [], mAqua);
 	}
 
 	/**
@@ -417,15 +424,11 @@ let app = ( function() {
 			gl.uniformMatrix3fv(prog.nMatrixUniform, false,
                 models[i].nMatrix);
 
-			// NEW
 			// Material.
-			if (models[i].fillstyle === "fill") {
-				gl.uniform3fv(prog.materialKaUniform, models[i].material.ka);
-				gl.uniform3fv(prog.materialKdUniform, models[i].material.kd);
-				gl.uniform3fv(prog.materialKsUniform, models[i].material.ks);
-				gl.uniform1f(prog.materialKeUniform, models[i].material.ke);
-			}
-            
+			gl.uniform3fv(prog.materialKaUniform, models[i].material.ka);
+			gl.uniform3fv(prog.materialKdUniform, models[i].material.kd);
+			gl.uniform3fv(prog.materialKsUniform, models[i].material.ks);
+			gl.uniform1f(prog.materialKeUniform, models[i].material.ke);  
 			
 			draw(models[i]);
 		}
@@ -464,7 +467,7 @@ let app = ( function() {
 		let mvMatrix = model.mvMatrix;
 		let nMatrix = model.nMatrix;
 
-		// Reset matrices to identity.         
+		// Reset matrices to identity.
         mat4.identity(mMatrix);
         mat4.identity(mvMatrix);
 
@@ -505,8 +508,6 @@ let app = ( function() {
 		// Setup rendering lines.
 		let wireframe = (model.fillstyle.search(/wireframe/) != -1);
 		if(wireframe) {
-			gl.disableVertexAttribArray(prog.colorAttrib);
-			gl.vertexAttrib4f(prog.colorAttrib, 0.6,1,0.6,1);
 			gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.iboLines);
 			gl.drawElements(gl.LINES, model.iboLines.numberOfElements,
 				gl.UNSIGNED_SHORT, 0);
