@@ -1,0 +1,113 @@
+<!DOCTYPE html5>
+<html lang="de">
+	<head>
+		<style>
+        @import url('https://fonts.googleapis.com/css2?family=Merriweather+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+        </style>
+		<meta charset="UTF-8">
+		<link rel="stylesheet" href="style.css">
+		<title>ESA08: Lichter auf einer Kreisbahn mit Toon Shading</title>
+		<script src="../src/gl-matrix.js"></script>
+		<script src="vertexData.js"></script>
+		<script src="app.js"></script>
+		<script type="x-shader/x-vertex" id="vertexshader">
+			attribute vec3 aPosition;
+			attribute vec3 aNormal;
+			
+			uniform mat4 uPMatrix;
+			uniform mat4 uMVMatrix;
+			uniform mat3 uNMatrix;
+			
+			//uniform vec4 uColor;
+			varying vec4 vColor;
+						
+			// Ambient light.
+			uniform vec3 ambientLight;
+			
+			// Pointlights.
+			const int MAX_LIGHT_SOURCES = 8;
+			struct LightSource {
+				bool isOn;
+				vec3 position;
+				vec3 color;
+			};
+			uniform LightSource light[MAX_LIGHT_SOURCES];
+			
+			// Material.
+			struct PhongMaterial {
+				vec3 ka;
+				vec3 kd;
+				vec3 ks;
+				float ke; 
+			};
+			uniform PhongMaterial material;
+			
+			// Phong illumination for single light source,
+			// no ambient light.
+			vec3 phong(vec3 p, vec3 n, vec3 v, LightSource l) {
+			
+				return vec3(0.0);
+			}
+			
+			// Phong illumination for multiple light sources
+			vec3 phong(vec3 p, vec3 n, vec3 v) {
+			
+				// Calculate ambient light.
+				vec3 result = material.ka * ambientLight;
+				
+				// Add light from all light sources.
+				for(int j=0; j < MAX_LIGHT_SOURCES; j++){
+					if(light[j].isOn){
+						result += phong(p, n, v, light[j]);
+					}
+				}
+				return result;
+			}
+			
+			void main(){
+				// Calculate vertex position in eye coordinates. 
+				vec4 tPosition = uMVMatrix * vec4(aPosition, 1.0);
+				// Calculate projektion.
+				gl_Position = uPMatrix * tPosition;
+			
+				vec3 tNormal = normalize(uNMatrix * aNormal);
+				
+				// Calculate view vector.
+				vec3 v = normalize(-tPosition.xyz);	
+								
+				vColor = vec4( phong(tPosition.xyz, tNormal, v), 1.0);
+			}
+		</script>
+		<script type="x-shader/x-fragment" id="fragmentshader">
+			precision mediump float;
+			varying vec4 vColor;
+
+			void main() {
+				gl_FragColor = vColor;
+			}
+		</script>
+	</head>
+	<body onload="app.start()">
+		<main>
+			<h1>ESA08: Lichter auf einer Kreisbahn mit Toon Shading</h1>
+			<canvas id="canvas" width="700" height="700"></canvas>
+			<p>Flugbahnen der Kugeln</p>
+			<h2>Interaktionen:</h2>
+			<div class="instructions">
+				<p>Linke / rechte Pfeiltaste: Kamera mit / entgegen dem Uhrzeigersinn bewegen</p>
+				<p>Obere / untere Pfeiltaste: Kamerahöhe hoch / runter</p>
+				<p>N / Shift + N: Kameradistanz zur Mitte verringern / vergrößern</p>
+				<p>O / P: Perspective-Mode oder Orthographic-Mode umschalten</p>
+				<p>I:</p>
+				<p>L:</p>
+				<p>T:</p>
+			</div>			
+            <a id="back" href="../index.html">Zurück zur Übersicht</a>
+			<footer>
+                <p>Diese Seite ist im Zuge des VFH-Kurses "Graphical Visualisation Technologies" entstanden.</p>
+                <p>Erstellt von Philipp Becker</p>
+            </footer>
+		</main>
+		
+	</body>
+</html>
