@@ -10,7 +10,7 @@
 		<script src="../src/gl-matrix.js"></script>
 		<script src="vertexData.js"></script>
 		<script src="app.js"></script>
-		<script type="x-shader/x-vertex" id="vertexshader">
+		<script type="x-shader/x-vertex" id="vertexshader-gouraud">
 			attribute vec3 aPosition;
 			attribute vec3 aNormal;
 			
@@ -72,7 +72,7 @@
 				return result;
 			}
 			
-			void main(){
+			void main() {
 				// Calculate vertex position in eye coordinates. 
 				vec4 tPosition = uMVMatrix * vec4(aPosition, 1.0);
 				// Calculate projektion.
@@ -83,15 +83,109 @@
 				// Calculate view vector.
 				vec3 v = normalize(-tPosition.xyz);	
 								
-				vColor = vec4( phong(tPosition.xyz, tNormal, v), 1.0);
+				vColor = vec4(phong(tPosition.xyz, tNormal, v), 1.0);
 			}
 		</script>
-		<script type="x-shader/x-fragment" id="fragmentshader">
+		<script type="x-shader/x-vertex" id="vertexshader-phong">
+			attribute vec3 aPosition;
+			attribute vec3 aNormal;
+			
+			uniform mat4 uPMatrix;
+			uniform mat4 uMVMatrix;
+			uniform mat3 uNMatrix;
+
+			varying vec3 vNormal;
+			varying vec4 vPosition;
+
+			
+			void main() {
+
+				// Calculate vertex position in eye coordinates.
+				vec4 tPosition = uMVMatrix * vec4(aPosition, 1.0);
+
+				// Calculate projektion.
+				gl_Position = uPMatrix * tPosition;
+			
+				vec3 tNormal = normalize(uNMatrix * aNormal);
+				
+				vNormal = tNormal;
+				vPosition = tPosition;
+			}
+		</script>
+		<script type="x-shader/x-fragment" id="fragmentshader-gouraud">
 			precision mediump float;
 			varying vec4 vColor;
 
 			void main() {
 				gl_FragColor = vColor;
+			}
+		</script>
+		<script type="x-shader/x-fragment" id="fragmentshader-phong">
+			precision mediump float;
+
+			varying vec3 vNormal;
+			varying vec4 vPosition;
+
+			// Ambient light.
+			uniform vec3 ambientLight;
+			
+			// Pointlights.
+			const int MAX_LIGHT_SOURCES = 8;
+			struct LightSource {
+				bool isOn;
+				vec3 position;
+				vec3 color;
+			};
+			uniform LightSource light[MAX_LIGHT_SOURCES];
+			
+			// Material.
+			struct PhongMaterial {
+				vec3 ka;
+				vec3 kd;
+				vec3 ks;
+				float ke; 
+			};
+			uniform PhongMaterial material;
+			
+			// Phong illumination for single light source,
+			// no ambient light.
+			vec3 phong(vec3 p, vec3 n, vec3 v, LightSource l) {
+
+				vec3 sj = normalize(l.position - p);
+				vec3 rj = 2. * dot(sj, n) * n - sj; // reflect
+			
+				// Calculate diffuse light
+				vec3 dl = material.kd * l.color * max(dot(n, sj), 0.);
+
+				// Calculate specular light
+				vec3 sl = material.ks * l.color * pow(max(dot(rj, v), 0.), material.ke);
+
+				return dl + sl;
+			}
+			
+			// Phong illumination for multiple light sources
+			vec3 phong(vec3 p, vec3 n, vec3 v) {
+			
+				// Calculate ambient light.
+				vec3 result = material.ka * ambientLight;
+				
+				// Add light from all light sources.
+				for(int j=0; j < MAX_LIGHT_SOURCES; j++){
+					if(light[j].isOn){
+						result += phong(p, n, v, light[j]);
+					}
+				}
+				return result;
+			}
+
+			void main() {
+
+				// Calculate view vector.
+				vec3 v = normalize(-vPosition.xyz);
+				
+				vec3 vNormal = normalize(vNormal);
+
+				gl_FragColor = vec4(phong(vPosition.xyz, vNormal, v), 1.0);
 			}
 		</script>
 	</head>

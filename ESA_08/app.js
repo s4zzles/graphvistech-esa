@@ -46,8 +46,8 @@ let app = ( function() {
         },
 		{
 			isOn : true,
-			position : [0, -2, 0],
-			color : [0, 0.8, 0.8]
+			position : [1, -1, 0],
+			color : [0.8, 0.8, 0]
 		},
 		]
     };
@@ -104,9 +104,9 @@ let app = ( function() {
 
 	function initShaderProgram() {
 		// Init vertex shader.
-		let vs = initShader(gl.VERTEX_SHADER, "vertexshader");
+		let vs = initShader(gl.VERTEX_SHADER, "vertexshader-phong");
 		// Init fragment shader.
-		let fs = initShader(gl.FRAGMENT_SHADER, "fragmentshader");
+		let fs = initShader(gl.FRAGMENT_SHADER, "fragmentshader-phong");
 		// Link shader into a shader program.
 		prog = gl.createProgram();
 		gl.attachShader(prog, vs);
@@ -189,14 +189,13 @@ let app = ( function() {
 		// Create some default material.
         let mDefault = createPhongMaterial();
 
-		let mRed = createPhongMaterial({kd: [ 1., 0., 0. ]});
-		let mGreen = createPhongMaterial({kd: [ 0., 1., 0. ]});
-		let mBlue = createPhongMaterial({kd: [ 0., 0., 1. ]});
-		let mPink = createPhongMaterial({kd: [ 1., 0., 1. ]});
-		let mYellow = createPhongMaterial({kd: [ 1., 1., 0. ]});
-		let mAqua = createPhongMaterial({kd: [ 0., 1., 1. ]});
-
-
+		let mRed = createPhongMaterial({ka: [0.2,0,0],kd: [ 1., 0., 0. ]});
+		let mGreen = createPhongMaterial({ka: [0,0.2,0],kd: [ 0., 1., 0. ]});
+		let mBlue = createPhongMaterial({ka: [0,0,0.2],kd: [ 0., 0., 1. ]});
+		let mPink = createPhongMaterial({ka: [0.2,0,0.2],kd: [ 1., 0., 1. ]});
+		let mYellow = createPhongMaterial({ka: [0.2,0.2,0],kd: [ 1., 1., 0. ]});
+		let mGold = createPhongMaterial({ka: [0.2,0.2,0],kd: [ 1., .9, 0. ],ks: [1, 1, 0], ke: 20.});
+		let mAqua = createPhongMaterial({ka: [0,0.2,0.2],kd: [ 0., 1., 1. ]});
 
 
 		createModel("torus", "fill", [0, 0, 0], [0, 0, 0], [1, 1, 1], [0.5, 0.2], mRed);
