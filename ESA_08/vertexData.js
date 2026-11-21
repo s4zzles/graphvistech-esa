@@ -1,8 +1,8 @@
 var torus = ( function() {
 
 	function createVertexData(outerRadius = 1.2, innerRadius = 0.18) {
-		let n = 16;
-		let m = 32;
+		let n = 24;
+		let m = 64;
 
 		// Position, normal, vertexcolor
 		this.vertices = new Float32Array(3 * 3 * 4 * (n + 1) * (m + 1));
@@ -190,8 +190,8 @@ var plane = ( function() {
 var sphere = ( function() {
 
 	function createVertexData(radius = 1) {
-		let n = 24; // circle verts
-		let m = 12; // line verts
+		let n = 32; // circle verts
+		let m =16; // line verts
 
 		let r = radius;
 

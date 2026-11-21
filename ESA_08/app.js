@@ -5,6 +5,9 @@ let app = ( function() {
 	// The shader program object is also used to
 	// store attribute and uniform locations.
 	let prog;
+	let progGouraud;
+	let progPhong;
+	let progToon;
 
 	// Array of model objects.
 	let models = [];
@@ -105,17 +108,55 @@ let app = ( function() {
 	}
 
 	function initShaderProgram() {
-		// Init vertex shader.
-		let vs = initShader(gl.VERTEX_SHADER, "vertexshader-phong");
-		// Init fragment shader.
-		let fs = initShader(gl.FRAGMENT_SHADER, "fragmentshader-toon");
-		// Link shader into a shader program.
-		prog = gl.createProgram();
-		gl.attachShader(prog, vs);
-		gl.attachShader(prog, fs);
-		gl.bindAttribLocation(prog, 0, "aPosition");
-		gl.linkProgram(prog);
+
+		// Init vertex shaders
+		let vsGouraud = initShader(gl.VERTEX_SHADER, "vertexshader-gouraud");
+		let vsPhong = initShader(gl.VERTEX_SHADER, "vertexshader-phong");
+
+		// Init fragment shaders
+		let fsGouraud = initShader(gl.FRAGMENT_SHADER, "fragmentshader-gouraud");
+		let fsPhong = initShader(gl.FRAGMENT_SHADER, "fragmentshader-phong");
+		let fsToon = initShader(gl.FRAGMENT_SHADER, "fragmentshader-toon");
+
+		// Create programs
+		progGouraud = createProgram(vsGouraud, fsGouraud);
+		progPhong = createProgram(vsPhong, fsPhong);
+		progToon = createProgram(vsPhong, fsToon);
+
+		prog = progPhong;
 		gl.useProgram(prog);
+	}
+
+	function createProgram(vs, fs) {
+
+		let program = gl.createProgram();
+
+		gl.attachShader(program, vs);
+		gl.attachShader(program, fs);
+
+		gl.bindAttribLocation(program, 0, "aPosition");
+
+		gl.linkProgram(program);
+
+		if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+			console.log(gl.getProgramInfoLog(program));
+			return null;
+		}
+
+		return program;
+	}
+
+	function switchShader(newProgram) {
+
+		prog = newProgram;
+
+		gl.useProgram(prog);
+
+		initUniforms();
+		prog.positionAttrib = gl.getAttribLocation(prog, 'aPosition');
+		prog.normalAttrib = gl.getAttribLocation(prog, 'aNormal');
+
+		render();
 	}
 
 	/**
@@ -331,6 +372,15 @@ let app = ( function() {
 				case('KeyL'):
 					animate = true;
 					sign = -1;
+					break;
+				case('KeyT'):
+					switchShader(progToon);
+					break;
+				case('KeyG'):
+					switchShader(progGouraud);
+					break;
+				case('KeyH'):
+					switchShader(progPhong);
 					break;
 			}
 
