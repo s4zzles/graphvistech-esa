@@ -188,6 +188,78 @@
 				gl_FragColor = vec4(phong(vPosition.xyz, vNormal, v), 1.0);
 			}
 		</script>
+		<script type="x-shader/x-fragment" id="fragmentshader-toon">
+			precision mediump float;
+
+			varying vec3 vNormal;
+			varying vec4 vPosition;
+
+			// Ambient light.
+			uniform vec3 ambientLight;
+			
+			// Pointlights.
+			const int MAX_LIGHT_SOURCES = 8;
+			struct LightSource {
+				bool isOn;
+				vec3 position;
+				vec3 color;
+			};
+			uniform LightSource light[MAX_LIGHT_SOURCES];
+			
+			// Material.
+			struct PhongMaterial {
+				vec3 ka;
+				vec3 kd;
+				vec3 ks;
+				float ke; 
+			};
+			uniform PhongMaterial material;
+			
+			// Phong illumination for single light source,
+			// no ambient light.
+			vec3 toon(vec3 p, vec3 n, vec3 v, LightSource l) {
+
+				vec3 sj = normalize(l.position - p);
+				vec3 rj = 2. * dot(sj, n) * n - sj; // reflect
+			
+				// Calculate diffuse light
+				float dlLuma = max(dot(n, sj), 0.);
+				float dlMask = smoothstep(0.1, 0.12, dlLuma);
+				vec3 dl = mix(vec3(0.), material.kd * l.color, dlMask);
+
+				// Calculate specular light
+				float slLuma = pow(max(dot(rj, v), 0.), material.ke);
+				float slMask = smoothstep(0.26, 0.3, slLuma);
+				vec3 sl = mix(vec3(0.), material.ks * l.color, slMask);
+
+				return dl + sl;
+			}
+			
+			// Phong illumination for multiple light sources
+			vec3 phong(vec3 p, vec3 n, vec3 v) {
+			
+				// Calculate ambient light.
+				vec3 result = material.ka * ambientLight;
+				
+				// Add light from all light sources.
+				for(int j=0; j < MAX_LIGHT_SOURCES; j++){
+					if(light[j].isOn){
+						result += toon(p, n, v, light[j]);
+					}
+				}
+				return result;
+			}
+
+			void main() {
+
+				// Calculate view vector.
+				vec3 v = normalize(-vPosition.xyz);
+				
+				vec3 vNormal = normalize(vNormal);
+
+				gl_FragColor = vec4(phong(vPosition.xyz, vNormal, v), 1.0);
+			}
+		</script>
 	</head>
 	<body onload="app.start()">
 		<main>

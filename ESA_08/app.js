@@ -38,23 +38,25 @@ let app = ( function() {
 
 	// Object with light sources characteristics in the scene.
     let illumination = {
-        ambientLight : [ .5, .5, .5 ],
+        ambientLight : [ .4, .4, .4],
         light : [ {
             isOn : true,
-            position : [ 2., 1., 0.5],
-            color : [ .75, .75, .75]
+            position : [ 0., 1., 0.],
+            color : [ .2, 1., .2],
+			orbitAngle : Math.PI
         },
 		{
 			isOn : true,
-			position : [1, -1, 0],
-			color : [0.8, 0.8, 0]
+			position : [0, -1, 0],
+			color : [1., 0.2, 0.2],
+			orbitAngle : 0
 		},
 		]
     };
 
 	function start() {
 		init();
-		render(false, 1);
+		render(true, 1);
 	}
 
 	function init() {
@@ -106,7 +108,7 @@ let app = ( function() {
 		// Init vertex shader.
 		let vs = initShader(gl.VERTEX_SHADER, "vertexshader-phong");
 		// Init fragment shader.
-		let fs = initShader(gl.FRAGMENT_SHADER, "fragmentshader-phong");
+		let fs = initShader(gl.FRAGMENT_SHADER, "fragmentshader-toon");
 		// Link shader into a shader program.
 		prog = gl.createProgram();
 		gl.attachShader(prog, vs);
@@ -175,7 +177,7 @@ let app = ( function() {
     function createPhongMaterial(material) {
         material = material || {};
         // Set some default values,
-        // if not defined in material paramter.
+        // if not defined in material parameter.
         material.ka = material.ka || [ 0.3, 0.3, 0.3 ];
         material.kd = material.kd || [ 0.6, 0.6, 0.6 ];
         material.ks = material.ks || [ 0.8, 0.8, 0.8 ];
@@ -189,13 +191,13 @@ let app = ( function() {
 		// Create some default material.
         let mDefault = createPhongMaterial();
 
-		let mRed = createPhongMaterial({ka: [0.2,0,0],kd: [ 1., 0., 0. ]});
-		let mGreen = createPhongMaterial({ka: [0,0.2,0],kd: [ 0., 1., 0. ]});
-		let mBlue = createPhongMaterial({ka: [0,0,0.2],kd: [ 0., 0., 1. ]});
-		let mPink = createPhongMaterial({ka: [0.2,0,0.2],kd: [ 1., 0., 1. ]});
-		let mYellow = createPhongMaterial({ka: [0.2,0.2,0],kd: [ 1., 1., 0. ]});
-		let mGold = createPhongMaterial({ka: [0.2,0.2,0],kd: [ 1., .9, 0. ],ks: [1, 1, 0], ke: 20.});
-		let mAqua = createPhongMaterial({ka: [0,0.2,0.2],kd: [ 0., 1., 1. ]});
+		let mRed = createPhongMaterial({ka: [ 0.6, 0.3, 0.3 ],kd: [ 0.6, 0.3, 0.3 ]});
+		let mGreen = createPhongMaterial({ka: [ 0.3, 0.6, 0.3 ],kd: [ 0.3, 0.6, 0.3 ]});
+		let mBlue = createPhongMaterial({ka: [ 0., 0., 1. ],kd: [ 0., 0., 1. ]});
+		let mPink = createPhongMaterial({ka: [ 1., 0., 1. ],kd: [ 1., 0., 1. ]});
+		let mYellow = createPhongMaterial({ka: [ 1., 1., 0. ],kd: [ 1., 1., 0. ]});
+		let mGold = createPhongMaterial({ka: [ 1., .9, 0. ],kd: [ 1., .9, 0. ],ks: [1, 1, 0], ke: 20.});
+		let mAqua = createPhongMaterial({ka: [ 0., 1., 1. ],kd: [ 0., 1., 1. ]});
 
 
 		createModel("torus", "fill", [0, 0, 0], [0, 0, 0], [1, 1, 1], [0.5, 0.2], mRed);
@@ -338,23 +340,23 @@ let app = ( function() {
 	}
 
 	// use this for light rotations
-	function orbitBody(model, center, radius, offset, degree, sign) {
-		let orbitAngle = model.orbitAngle;
+	function orbit(light, center, radius, offset, degree, sign) {
+		let orbitAngle = light.orbitAngle;
 		let delta = (Math.PI * 2 / 360) * degree * sign;
 		orbitAngle = (orbitAngle + delta) % (Math.PI * 2);
 
 
 		// orbit on XZ plane in local space
-		model.translate = [
+		light.position = [
 			radius * Math.cos(orbitAngle + offset), 
 			0, 
 			radius * Math.sin(orbitAngle + offset)
 		];
 
 		// add center array to translate
-		model.translate = model.translate.map((value, i) => value + center[i]);
+		light.position = light.position.map((value, i) => value + center[i]);
 
-		model.orbitAngle = orbitAngle;
+		light.orbitAngle = orbitAngle;
 	}
 
 
@@ -369,7 +371,6 @@ let app = ( function() {
 
 		camera.vMatrix = calculateCameraOrbit();
 
-		// NEW
         // Set light uniforms.
         gl.uniform3fv(prog.ambientLightUniform, illumination.ambientLight);
         // Loop over light sources.
@@ -377,8 +378,15 @@ let app = ( function() {
             // bool is transferred as integer.
             gl.uniform1i(prog.lightUniform[j].isOn,
                     illumination.light[j].isOn);
-            // Tranform light postion in eye coordinates.
-            // Copy current light position into a new array.
+            
+			// animate lights in orbit
+			if(animate) {
+				 let s = j == 0 ? 1 : -1;
+				let l = illumination.light[j];
+				orbit(l, [0, 0.75 * s, 0], 1, 0, 5, sign);
+			}
+			
+
             let lightPos = [].concat(illumination.light[j].position);
             // Add homogenious coordinate for transformation.
             lightPos.push(1.0);
@@ -392,26 +400,6 @@ let app = ( function() {
 
 		// Loop over models.
 		for(let i = 0; i < models.length; i++) {
-
-			// update translate/rotation for animation frames
-			if(animate) {
-				if(models[i].geometryname === 'sphere') {
-					switch(i) {
-						case 1:
-							orbitBody(models[i], [-0.5,0,0], 0.6, 0, -5, sign);
-							break;
-						case 2:
-							orbitBody(models[i], [0.5,0,0], 0.6, 0, -5, sign);
-							break;
-						case 3:
-							orbitBody(models[i], [0,0,0.5], 0.6, Math.PI, -5, sign);
-							break;
-						case 4:
-							orbitBody(models[i], [0,0,-0.5], 0.6, Math.PI, -5, sign);
-							break;
-					}
-				}
-			}
 			
 			// Update modelview for model.
 			updateTransformations(models[i]);
