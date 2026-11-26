@@ -121,20 +121,51 @@
 		<script type="x-shader/x-fragment" id="fragmentshader-gouraud">
 			precision mediump float;
 
+			const float TAU = 6.283185;
+
 			uniform sampler2D uTexture;
+			uniform float uAmount;
 
 			varying vec4 vColor;
 			varying vec2 vTextureCoord;
 
+			float line(float offset, float amount, float distortion, float value) {
+					return mod(floor((vTextureCoord.t + distortion + offset) * amount), 2.) * value;
+			}
+
+			vec4 proceduralTexture() {
+				vec3 color = vec3(0);
+				float distortion = sin(vTextureCoord.s * TAU * 10.) * 0.02
+                 + sin(vTextureCoord.t * TAU * 10.) * 0.02;
+
+				color.r = line(-0.1, uAmount, distortion, 0.9);
+				color.g = line(0., uAmount, distortion, 0.9);
+				color.b = line(0.1, uAmount, distortion, 0.9);
+
+				return vec4(color, 1);
+			}
+
 			void main() {
 				vec4 col = texture2D(uTexture, vTextureCoord);
-				gl_FragColor = col * vColor;
+				vec4 finalColor;
+
+				// check if texture is black (i.e. there is no texture)
+				if(all(equal(col, vec4(0.0, 0.0, 0.0, 1.0)))) {
+					finalColor = proceduralTexture() * vColor;
+				}
+				else {
+					finalColor = col * vColor;
+				}
+				gl_FragColor = finalColor;			
 			}
 		</script>
 		<script type="x-shader/x-fragment" id="fragmentshader-phong">
 			precision mediump float;
 
+			const float TAU = 6.283185;
+
 			uniform sampler2D uTexture;
+			uniform float uAmount;
 
 			varying vec3 vNormal;
 			varying vec4 vPosition;
@@ -192,6 +223,23 @@
 				return result;
 			}
 
+
+			float line(float offset, float amount, float distortion, float value) {
+					return mod(floor((vTextureCoord.t + distortion + offset) * amount), 2.) * value;
+			}
+
+			vec4 proceduralTexture() {
+				vec3 color = vec3(0);
+				float distortion = sin(vTextureCoord.s * TAU * 10.) * 0.02
+                 + sin(vTextureCoord.t * TAU * 10.) * 0.02;
+
+				color.r = line(-0.1, uAmount, distortion, 0.9);
+				color.g = line(0., uAmount, distortion, 0.9);
+				color.b = line(0.1, uAmount, distortion, 0.9);
+
+				return vec4(color, 1);
+			}
+
 			void main() {
 
 				// Calculate view vector.
@@ -200,15 +248,27 @@
 				vec3 n = normalize(vNormal);
 
 				vec4 col = texture2D(uTexture, vTextureCoord);
-				col = col * vec4(phong(vPosition.xyz, n, v), 1.0);
+				vec4 finalColor;
 
-				gl_FragColor = col;
+				// check if texture is black (i.e. there is no texture)
+				if(all(equal(col, vec4(0.0, 0.0, 0.0, 1.0)))) {
+					finalColor = proceduralTexture() * vec4(phong(vPosition.xyz, n, v), 1.0);
+
+
+				}
+				else {
+					finalColor = col * vec4(phong(vPosition.xyz, n, v), 1.0);
+				}
+				gl_FragColor = finalColor;			
 			}
 		</script>
 		<script type="x-shader/x-fragment" id="fragmentshader-toon">
 			precision mediump float;
 
+			const float TAU = 6.283185;
+
 			uniform sampler2D uTexture;
+			uniform float uAmount;
 
 			varying vec3 vNormal;
 			varying vec4 vPosition;
@@ -244,15 +304,31 @@
 			
 				// Calculate diffuse light
 				float dlLuma = max(dot(n, sj), 0.);
-				float dlMask = smoothstep(0.1, 0.12, dlLuma);
+				float dlMask = smoothstep(0.08, 0.24, dlLuma);
 				vec3 dl = mix(vec3(0.), material.kd * l.color, dlMask);
 
 				// Calculate specular light
 				float slLuma = pow(max(dot(rj, v), 0.), material.ke);
-				float slMask = smoothstep(0.26, 0.3, slLuma);
+				float slMask = smoothstep(0.2, 0.3, slLuma);
 				vec3 sl = mix(vec3(0.), material.ks * l.color, slMask);
 
 				return dl + sl;
+			}
+
+			float line(float offset, float amount, float distortion, float value) {
+					return mod(floor((vTextureCoord.t + distortion + offset) * amount), 2.) * value;
+			}
+
+			vec4 proceduralTexture() {
+				vec3 color = vec3(0);
+				float distortion = sin(vTextureCoord.s * TAU * 10.) * 0.02
+                 + sin(vTextureCoord.t * TAU * 10.) * 0.02;
+
+				color.r = line(-0.1, uAmount, distortion, 0.9);
+				color.g = line(0., uAmount, distortion, 0.9);
+				color.b = line(0.1, uAmount, distortion, 0.9);
+
+				return vec4(color, 1);
 			}
 			
 			// Phong illumination for multiple light sources
@@ -278,9 +354,18 @@
 				vec3 n = normalize(vNormal);
 
 				vec4 col = texture2D(uTexture, vTextureCoord);
-				col = col * vec4(phong(vPosition.xyz, n, v), 1.0);
+				vec4 finalColor;
 
-				gl_FragColor = col;
+				// check if texture is black (i.e. there is no texture)
+				if(all(equal(col, vec4(0.0, 0.0, 0.0, 1.0)))) {
+					finalColor = proceduralTexture() * vec4(phong(vPosition.xyz, n, v), 1.0);
+
+
+				}
+				else {
+					finalColor = col * vec4(phong(vPosition.xyz, n, v), 1.0);
+				}
+				gl_FragColor = finalColor;			
 			}
 		</script>
 	</head>
@@ -288,7 +373,7 @@
 		<main>
 			<h1>ESA09: Torustextur</h1>
 			<canvas id="canvas" width="700" height="700"></canvas>
-			<p>qweqwe</p>
+			<p>Donut & Regenbogen</p>
 			<h2>Interaktionen:</h2>
 			<div class="instructions">
 				<p>Linke / rechte Pfeiltaste: Kamera mit / entgegen dem Uhrzeigersinn bewegen</p>

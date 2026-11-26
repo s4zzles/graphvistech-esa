@@ -9,6 +9,8 @@ let app = ( function() {
 	let progPhong;
 	let progToon;
 
+	let amount = 6.;
+
 	// Array of model objects.
 	let models = [];
 
@@ -85,7 +87,7 @@ let app = ( function() {
 	 * be in render function.
 	 */
 	function initPipeline() {
-		gl.clearColor(0.5, .6, .8, 1);
+		gl.clearColor(0.4, .6, .9, 1);
 
 		// Backface culling.
 		gl.frontFace(gl.CCW);
@@ -213,6 +215,7 @@ let app = ( function() {
 
 		// Texture.
         prog.textureUniform = gl.getUniformLocation(prog, "uTexture");
+		prog.amountUniform = gl.getUniformLocation(prog, "uAmount");
 	}
 
 	function initTexture(model, filename) {
@@ -278,10 +281,11 @@ let app = ( function() {
 		let mWhite = createPhongMaterial({ka: [ 1., 1., 1. ],kd: [ 1., 1., 1. ], ks: [0.2,0.2,0.2]});
 
 
-		createModel("torus", "fill", [0, -0.2, 0], [-Math.PI / 2, 0, 0], [1, 1, 1], [0.55, 0.25], mWhite,
+		createModel("torus", "fill", [0.275, 0, 0], [Math.PI / 4, 0, 0], [1, 1, 1], [0.55, 0.25], mWhite);
+		createModel("torus", "fill", [-0.275, 0, 0], [-Math.PI / 4, 0, 0], [1, 1, 1], [0.55, 0.25], mWhite,
 			"textures/donut.png"
 		);
-		createModel("plane", "fill", [0, -0.7, 0], [0, 0, 0], [1, 1, 1], [2.1,2.1], mWhite, 
+		createModel("plane", "fill", [0, -0.7, 0], [0, 0, 0], [1, 1, 1], [3,3], mWhite, 
 			"textures/Grass_basecolor1.png"
 		);
 	}
@@ -427,6 +431,12 @@ let app = ( function() {
 				case('KeyH'):
 					switchShader(progPhong);
 					break;
+				case('KeyW'):
+					amount += 0.025;
+					break;
+				case('KeyQ'):
+					amount -= 0.025;
+					break;
 			}
 
 			// Render the scene again on any key pressed.
@@ -515,6 +525,7 @@ let app = ( function() {
             gl.activeTexture(gl.TEXTURE0);
             gl.bindTexture(gl.TEXTURE_2D, models[i].texture);
             gl.uniform1i(prog.textureUniform, 0);
+			gl.uniform1f(prog.amountUniform, amount);
 			
 			draw(models[i]);
 		}
