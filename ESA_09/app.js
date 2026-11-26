@@ -41,7 +41,7 @@ let app = ( function() {
 
 	// Object with light sources characteristics in the scene.
     let illumination = {
-        ambientLight : [ .4, .4, .4],
+        ambientLight : [ .5, .5, .5],
         light : [ {
             isOn : true,
             position : [ 0., 1., 0.],
@@ -51,7 +51,7 @@ let app = ( function() {
 		{
 			isOn : true,
 			position : [0, -1, 0],
-			color : [.5, 0.5, 0.2],
+			color : [.5, .2, 0.],
 			orbitAngle : 0
 		},
 		]
@@ -85,7 +85,7 @@ let app = ( function() {
 	 * be in render function.
 	 */
 	function initPipeline() {
-		gl.clearColor(0.25, .25, .3, 1);
+		gl.clearColor(0.5, .6, .8, 1);
 
 		// Backface culling.
 		gl.frontFace(gl.CCW);
@@ -155,6 +155,7 @@ let app = ( function() {
 		initUniforms();
 		prog.positionAttrib = gl.getAttribLocation(prog, 'aPosition');
 		prog.normalAttrib = gl.getAttribLocation(prog, 'aNormal');
+		prog.textureCoordAttrib = gl.getAttribLocation(prog, 'aTextureCoord');
 
 		render();
 	}
@@ -238,9 +239,9 @@ let app = ( function() {
 
         // Set texture parameter.
         // Min Filter: NEAREST,LINEAR, .. , LINEAR_MIPMAP_LINEAR,
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
         // Mag Filter: NEAREST,LINEAR
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
         // Use mip-Mapping.
         gl.generateMipmap(gl.TEXTURE_2D);
 
@@ -274,12 +275,15 @@ let app = ( function() {
 		// Create some default material.
         let mDefault = createPhongMaterial();
 
-		let mWhite = createPhongMaterial({ka: [ 1., 1., 1. ],kd: [ 1., 1., 1. ]});
+		let mWhite = createPhongMaterial({ka: [ 1., 1., 1. ],kd: [ 1., 1., 1. ], ks: [0.2,0.2,0.2]});
 
 
-		//createModel("torus", "fill", [0, 0, 0], [0, 0, 0], [1, 1, 1], [0.5, 0.2], mWhite);
+		createModel("torus", "fill", [0, -0.2, 0], [-Math.PI / 2, 0, 0], [1, 1, 1], [0.55, 0.25], mWhite,
+			"textures/donut.png"
+		);
 		createModel("plane", "fill", [0, -0.7, 0], [0, 0, 0], [1, 1, 1], [2.1,2.1], mWhite, 
-			"textures/stone_floor_1_basecolor.png");
+			"textures/Grass_basecolor1.png"
+		);
 	}
 
 	/**

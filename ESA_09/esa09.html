@@ -120,10 +120,15 @@
 		</script>
 		<script type="x-shader/x-fragment" id="fragmentshader-gouraud">
 			precision mediump float;
+
+			uniform sampler2D uTexture;
+
 			varying vec4 vColor;
+			varying vec2 vTextureCoord;
 
 			void main() {
-				gl_FragColor = vColor;
+				vec4 col = texture2D(uTexture, vTextureCoord);
+				gl_FragColor = col * vColor;
 			}
 		</script>
 		<script type="x-shader/x-fragment" id="fragmentshader-phong">
@@ -203,8 +208,11 @@
 		<script type="x-shader/x-fragment" id="fragmentshader-toon">
 			precision mediump float;
 
+			uniform sampler2D uTexture;
+
 			varying vec3 vNormal;
 			varying vec4 vPosition;
+			varying vec2 vTextureCoord;
 
 			// Ambient light.
 			uniform vec3 ambientLight;
@@ -269,7 +277,10 @@
 				
 				vec3 n = normalize(vNormal);
 
-				gl_FragColor = vec4(phong(vPosition.xyz, n, v), 1.0);
+				vec4 col = texture2D(uTexture, vTextureCoord);
+				col = col * vec4(phong(vPosition.xyz, n, v), 1.0);
+
+				gl_FragColor = col;
 			}
 		</script>
 	</head>

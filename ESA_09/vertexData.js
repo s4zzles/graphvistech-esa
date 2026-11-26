@@ -35,27 +35,28 @@ var torus = ( function() {
 
 
 				// Set vertex positions.
-				vertices[iVertex * 10] = x;
-				vertices[iVertex * 10 + 1] = y;
-				vertices[iVertex * 10 + 2] = z;
+				vertices[iVertex * 12] = x;
+				vertices[iVertex * 12 + 1] = y;
+				vertices[iVertex * 12 + 2] = z;
 
 				// Calc and set normals.
 				let nx = Math.cos(u) * Math.cos(v);
 				let ny = Math.cos(u) * Math.sin(v);
 				let nz = Math.sin(u);
 
-				vertices[iVertex * 10 + 3] = nx;
-				vertices[iVertex * 10 + 4] = ny;
-				vertices[iVertex * 10 + 5] = nz;
+				vertices[iVertex * 12 + 3] = nx;
+				vertices[iVertex * 12 + 4] = ny;
+				vertices[iVertex * 12 + 5] = nz;
 
 				// Set vertex color (unused)
-				vertices[iVertex * 10 + 6] = 1;
-				vertices[iVertex * 10 + 7] = 1;
-				vertices[iVertex * 10 + 8] = 1;
-				vertices[iVertex * 10 + 9] = 1;
+				vertices[iVertex * 12 + 6] = 1;
+				vertices[iVertex * 12 + 7] = 1;
+				vertices[iVertex * 12 + 8] = 1;
+				vertices[iVertex * 12 + 9] = 1;
 
 				// texture Coords
-
+				vertices[iVertex * 12 + 10] = u / (2 * Math.PI);
+				vertices[iVertex * 12 + 11] = v / (2 * Math.PI) * 3;
 
 				// Set index.
 				// Line on beam.
@@ -148,8 +149,8 @@ var plane = ( function() {
 				vertices[iVertex * 12 + 9] = 1;
 				
 				// Set texture coordinate.
-				vertices[iVertex * 12 +10] = (u + width / 2.) / width * 2; // s
-				vertices[iVertex * 12 + 11] = (v + depth / 2.) / depth * 2; // t
+				vertices[iVertex * 12 +10] = (u + width / 2.) / width; // s
+				vertices[iVertex * 12 + 11] = (v + depth / 2.) / depth; // t
 
 				// Set index.
 				// Line on beam.
