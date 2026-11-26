@@ -45,13 +45,13 @@ let app = ( function() {
         light : [ {
             isOn : true,
             position : [ 0., 1., 0.],
-            color : [ .2, 1., .2],
+            color : [ .4, .4, .7],
 			orbitAngle : Math.PI
         },
 		{
 			isOn : true,
 			position : [0, -1, 0],
-			color : [1., 0.2, 0.2],
+			color : [.5, 0.5, 0.2],
 			orbitAngle : 0
 		},
 		]
@@ -209,7 +209,49 @@ let app = ( function() {
         prog.materialKdUniform = gl.getUniformLocation(prog, "material.kd");
         prog.materialKsUniform = gl.getUniformLocation(prog, "material.ks");
         prog.materialKeUniform = gl.getUniformLocation(prog, "material.ke");
+
+		// Texture.
+        prog.textureUniform = gl.getUniformLocation(prog, "uTexture");
 	}
+
+	function initTexture(model, filename) {
+        var texture = gl.createTexture();
+        model.texture = texture;
+        texture.loaded = false;
+        texture.image = new Image();
+        texture.image.onload = function() {
+            onloadTextureImage(texture);
+        };
+        texture.image.src = filename;
+    }
+
+    function onloadTextureImage(texture) {
+
+        texture.loaded = true;
+
+        // Use texture object.
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+
+        // Assigen image data.
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE,
+                texture.image);
+
+        // Set texture parameter.
+        // Min Filter: NEAREST,LINEAR, .. , LINEAR_MIPMAP_LINEAR,
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        // Mag Filter: NEAREST,LINEAR
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        // Use mip-Mapping.
+        gl.generateMipmap(gl.TEXTURE_2D);
+
+        // Release texture object.
+        gl.bindTexture(gl.TEXTURE_2D, null);
+
+        // Update the scene.
+        render();
+    }
+
+	
 
 	/**
      * @paramter material : objekt with optional ka, kd, ks, ke.
@@ -232,21 +274,12 @@ let app = ( function() {
 		// Create some default material.
         let mDefault = createPhongMaterial();
 
-		let mRed = createPhongMaterial({ka: [ 0.6, 0.3, 0.3 ],kd: [ 0.6, 0.3, 0.3 ]});
-		let mGreen = createPhongMaterial({ka: [ 0.3, 0.6, 0.3 ],kd: [ 0.3, 0.6, 0.3 ]});
-		let mBlue = createPhongMaterial({ka: [ 0., 0., 1. ],kd: [ 0., 0., 1. ]});
-		let mPink = createPhongMaterial({ka: [ 1., 0., 1. ],kd: [ 1., 0., 1. ]});
-		let mYellow = createPhongMaterial({ka: [ 1., 1., 0. ],kd: [ 1., 1., 0. ]});
-		let mGold = createPhongMaterial({ka: [ 1., .9, 0. ],kd: [ 1., .9, 0. ],ks: [1, 1, 0], ke: 20.});
-		let mAqua = createPhongMaterial({ka: [ 0., 1., 1. ],kd: [ 0., 1., 1. ]});
+		let mWhite = createPhongMaterial({ka: [ 1., 1., 1. ],kd: [ 1., 1., 1. ]});
 
 
-		createModel("torus", "fill", [0, 0, 0], [0, 0, 0], [1, 1, 1], [0.5, 0.2], mRed);
-		createModel("sphere", "fill", [1, 0, 0], [0, 0, 0], [1, 1, 1], [0.1], mGreen);
-		createModel("sphere", "fill", [-1, 0, 0], [0, 0, 0], [1, 1, 1], [0.15], mBlue);
-		createModel("sphere", "fill", [0, -1, 0], [0, 0, 0], [1, 1, 1], [0.2], mPink);
-		createModel("sphere", "fill", [0, 1, 0], [0, 0, 0], [1, 1, 1], [0.25], mYellow);
-		createModel("plane", "wireframe", [0, -1, 0], [0, 0, 0], [1, 1, 1], [], mAqua);
+		//createModel("torus", "fill", [0, 0, 0], [0, 0, 0], [1, 1, 1], [0.5, 0.2], mWhite);
+		createModel("plane", "fill", [0, -0.7, 0], [0, 0, 0], [1, 1, 1], [2.1,2.1], mWhite, 
+			"textures/stone_floor_1_basecolor.png");
 	}
 
 	/**
@@ -255,12 +288,18 @@ let app = ( function() {
 	 * @parameter geometryname: string with name of geometry.
 	 * @parameter fillstyle: wireframe, fill, fillwireframe.
 	 */
-    function createModel(geometryname, fillstyle, translate, rotate, scale, varArray, material) {
+    function createModel(geometryname, fillstyle, translate, rotate, scale, varArray, material, 
+		textureFilename) {
 		let model = {};
 		model.fillstyle = fillstyle;
 		model.geometryname = geometryname;
 		initDataAndBuffers(model, geometryname, varArray);
 		initTransformations(model, translate, rotate, scale);
+
+		if (textureFilename) {
+            initTexture(model, textureFilename);
+        }
+
 		model.material = material;
 
 		models.push(model);
@@ -311,6 +350,8 @@ let app = ( function() {
 		prog.normalAttrib = gl.getAttribLocation(prog, 'aNormal');
 		gl.enableVertexAttribArray(prog.normalAttrib);
 
+		prog.textureCoordAttrib = gl.getAttribLocation(prog, 'aTextureCoord');
+		gl.enableVertexAttribArray(prog.textureCoordAttrib);
 
 		// Setup lines index buffer object.
 		model.iboLines = gl.createBuffer();
@@ -466,6 +507,10 @@ let app = ( function() {
 			gl.uniform3fv(prog.materialKdUniform, models[i].material.kd);
 			gl.uniform3fv(prog.materialKsUniform, models[i].material.ks);
 			gl.uniform1f(prog.materialKeUniform, models[i].material.ke);  
+			// Texture.
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, models[i].texture);
+            gl.uniform1i(prog.textureUniform, 0);
 			
 			draw(models[i]);
 		}
@@ -531,8 +576,9 @@ let app = ( function() {
 	function draw(model) {
 		// Setup VBO
 		gl.bindBuffer(gl.ARRAY_BUFFER, model.vbo);
-		gl.vertexAttribPointer(prog.positionAttrib,3,gl.FLOAT,false,40,0);
-		gl.vertexAttribPointer(prog.normalAttrib,3,gl.FLOAT,false,40,12);
+		gl.vertexAttribPointer(prog.positionAttrib,3,gl.FLOAT,false,48,0);
+		gl.vertexAttribPointer(prog.normalAttrib,3,gl.FLOAT,false,48,12);
+		gl.vertexAttribPointer(prog.textureCoordAttrib,3,gl.FLOAT,false,48,40);
 
 		// Setup rendering tris.
 		let fill = (model.fillstyle.search(/fill/) != -1);

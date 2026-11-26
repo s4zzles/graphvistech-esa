@@ -5,7 +5,7 @@ var torus = ( function() {
 		let m = 64;
 
 		// Position, normal, vertexcolor
-		this.vertices = new Float32Array(3 * 3 * 4 * (n + 1) * (m + 1));
+		this.vertices = new Float32Array(3 * 3 * 4 * 2 * (n + 1) * (m + 1));
 		let vertices = this.vertices;
 
 		// Index data.
@@ -39,8 +39,6 @@ var torus = ( function() {
 				vertices[iVertex * 10 + 1] = y;
 				vertices[iVertex * 10 + 2] = z;
 
-
-
 				// Calc and set normals.
 				let nx = Math.cos(u) * Math.cos(v);
 				let ny = Math.cos(u) * Math.sin(v);
@@ -55,6 +53,8 @@ var torus = ( function() {
 				vertices[iVertex * 10 + 7] = 1;
 				vertices[iVertex * 10 + 8] = 1;
 				vertices[iVertex * 10 + 9] = 1;
+
+				// texture Coords
 
 
 				// Set index.
@@ -100,68 +100,66 @@ var torus = ( function() {
 
 var plane = ( function() {
 
-	function createVertexData(w = 2.8, d = 2.8) {
-		let n = 12; // x verts
-		let m = 12; // z verts
-
-		let width = w;
-		let depth = d;
+	function createVertexData(width = 3, depth = 3) {
+		let n = 1;
+		let m = 1;
 
 		// Positions.
-		this.vertices = new Float32Array(3 * 3 * 4 * (n * m));
+		this.vertices = new Float32Array(3 * 3 * 4 * 2 * (n + 1) * (m + 1));
 		let vertices = this.vertices;
 
 		// Index data.
-		this.indicesLines = new Uint16Array(4 * n * m - 2 * n - 2 * m);
+		this.indicesLines = new Uint16Array(2 * 2 * n * m);
 		let indicesLines = this.indicesLines;
-		this.indicesTris = new Uint16Array(2 * 3 * (n - 1) * (m - 1));
+		this.indicesTris = new Uint16Array(3 * 2 * n * m);
 		let indicesTris = this.indicesTris;
 
 		let du = width / n;
 		let dv = depth / m;
-
 		// Counter for entries in index array.
 		let iLines = 0;
 		let iTris = 0;
 
-		// Loop width
-		for(let i = 0, u = -width / 2 + du / 2; i < n; i++, u += du) {
-			// Loop depth
-			for(let j = 0, v = -depth / 2 + dv / 2; j < m; j++, v += dv) {
+		// Loop u.
+		for(let i = 0, u = -width / 2.; i <= n; i++, u += du) {
+			// Loop v.
+			for(let j = 0, v = -depth / 2.; j <= m; j++, v += dv) {
 
-				let iVertex = (i * m) + j;
+				let iVertex = i * (m + 1) + j;
 
 				let x = u;
 				let y = 0;
 				let z = v;
 
 				// Set vertex positions.
-				vertices[iVertex * 10] = x;
-				vertices[iVertex * 10 + 1] = y;
-				vertices[iVertex * 10 + 2] = z;
+				vertices[iVertex * 12] = x;
+				vertices[iVertex * 12 + 1] = y;
+				vertices[iVertex * 12 + 2] = z;
 
 				// Calc and set normals.
-				let nx = 0;
-				let ny = 1;
-				let nz = 0;
-				vertices[iVertex * 10 + 3] = nx;
-				vertices[iVertex * 10 + 4] = ny;
-				vertices[iVertex * 10 + 5] = nz;
+				vertices[iVertex * 12 + 3] = 0;
+				vertices[iVertex * 12 + 4] = 1;
+				vertices[iVertex * 12 + 5] = 0;
 
-				// set vertex color (unused)
-				vertices[iVertex * 10 + 6] = 0;
-				vertices[iVertex * 10 + 7] = 0;
-				vertices[iVertex * 10 + 8] = 0;
-				vertices[iVertex * 10 + 9] = 1;
+				// Vertex colors (unused)
+				vertices[iVertex * 12 + 6] = 1;
+				vertices[iVertex * 12 + 7] = 1;
+				vertices[iVertex * 12 + 8] = 1;
+				vertices[iVertex * 12 + 9] = 1;
+				
+				// Set texture coordinate.
+				vertices[iVertex * 12 +10] = (u + width / 2.) / width * 2; // s
+				vertices[iVertex * 12 + 11] = (v + depth / 2.) / depth * 2; // t
 
 				// Set index.
-				if(j > 0) {
+				// Line on beam.
+				if(j > 0 && i > 0) {
 					indicesLines[iLines++] = iVertex - 1;
 					indicesLines[iLines++] = iVertex;
 				}
-
-				if(i > 0) {
-					indicesLines[iLines++] = iVertex - m;
+				// Line on ring.
+				if(j > 0 && i > 0) {
+					indicesLines[iLines++] = iVertex - (m + 1);
 					indicesLines[iLines++] = iVertex;
 				}
 
@@ -172,103 +170,9 @@ var plane = ( function() {
 					indicesTris[iTris++] = iVertex - 1;
 					indicesTris[iTris++] = iVertex - (m + 1);
 					//
-					indicesTris[iTris++] = iVertex - (m + 1);
-					indicesTris[iTris++] = iVertex - (m + 1) + 1;
-					indicesTris[iTris++] = iVertex;
-				}
-			}
-		}
-	}
-
-	return {
-		createVertexData : createVertexData
-	}
-
-}());
-
-
-var sphere = ( function() {
-
-	function createVertexData(radius = 1) {
-		let n = 32; // circle verts
-		let m =16; // line verts
-
-		let r = radius;
-
-		// Positions.
-		this.vertices = new Float32Array(3 * 3 * 4 * (n + 1) * (m + 1));
-		let vertices = this.vertices;
-
-		// Index data.
-		this.indicesLines = new Uint16Array(4 * m * n + 2 * n);
-		let indicesLines = this.indicesLines;
-		this.indicesTris = new Uint16Array(3 * 2 * n * m);
-		let indicesTris = this.indicesTris;
-
-		let du = Math.PI * 2 / n;
-		let dv = Math.PI / m;
-
-		// Counter for entries in index array.
-		let iLines = 0;
-		let iTris = 0;
-
-		// Loop width
-		for(let i = 0, u = -Math.PI; i <= n; i++, u += du) {
-			// Loop depth
-			for(let j = 0, v = 0; j <= m; j++, v += dv) {
-
-				let iVertex = i * (m + 1) + j;
-
-				let x = r * Math.sin(v) * Math.cos(u);
-				let y = r * Math.cos(v);
-				let z = r * Math.sin(v) * Math.sin(u);
-
-				// Set vertex positions.
-				vertices[iVertex * 10] = x;
-				vertices[iVertex * 10 + 1] = y;
-				vertices[iVertex * 10 + 2] = z;
-
-				// Calc and set normals.
-
-				let vertexLength = Math.sqrt(x*x+y*y+z*z);
-				let nx = x/vertexLength;
-				let ny = y/vertexLength;
-				let nz = z/vertexLength;
-				vertices[iVertex * 10 + 3] = nx;
-				vertices[iVertex * 10 + 4] = ny;
-				vertices[iVertex * 10 + 5] = nz;
-
-				// set vertex color (unused)
-				vertices[iVertex * 10 + 6] = 1;
-				vertices[iVertex * 10 + 7] = 1;
-				vertices[iVertex * 10 + 8] = 1;
-				vertices[iVertex * 10 + 9] = 1;
-
-
-				// Set index.
-				// Line on beam.
-				if(j > 0 && i > 0) {
-					indicesLines[iLines++] = iVertex - 1;
-					indicesLines[iLines++] = iVertex;
-				}
-				// Line on ring.
-				if(i > 0) {
-					indicesLines[iLines++] = iVertex - (m + 1);
-					indicesLines[iLines++] = iVertex;
-				}
-
-				// Set index.
-				// Two Triangles.
-				if(j > 0 && i > 0) {
-					indicesTris[iTris++] = iVertex;
-					indicesTris[iTris++] = iVertex - (m + 1);
 					indicesTris[iTris++] = iVertex - 1;
-					
-					
-					indicesTris[iTris++] = iVertex - 1;
-					indicesTris[iTris++] = iVertex - (m + 1);
 					indicesTris[iTris++] = iVertex - (m + 1) - 1;
-					
+					indicesTris[iTris++] = iVertex - (m + 1);
 				}
 			}
 		}
@@ -276,6 +180,6 @@ var sphere = ( function() {
 
 	return {
 		createVertexData : createVertexData
-	}
+	};
 
 }());
