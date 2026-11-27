@@ -38,7 +38,10 @@ let app = ( function() {
 		zAngle : 0.25,
 		// Distance in XZ-Plane from center when orbiting.
 		distance : 1.5,
-		height : 0.5
+		height : 0.5,
+
+		near: 0.1,
+		far: 3.
 	};
 
 	function start() {
@@ -69,7 +72,7 @@ let app = ( function() {
 	 * be in render function.
 	 */
 	function initPipeline() {
-		gl.clearColor(0.1, 0.1, 0.25, 1.0);
+		gl.clearColor(0.6, 0.6, 0.7, 1.0);
 
 		// Backface culling.
 		gl.frontFace(gl.CCW);
@@ -158,6 +161,11 @@ let app = ( function() {
 
 		// Normal-Matrix
 		prog.nMatrixUniform = gl.getUniformLocation(prog, "uNMatrix");
+
+		// clip uniforms
+		prog.nearUniform = gl.getUniformLocation(prog, "uNear");
+		prog.farUniform = gl.getUniformLocation(prog, "uFar");
+
 	}
 
 	function initModels() {
@@ -399,6 +407,9 @@ let app = ( function() {
 
 			gl.uniformMatrix3fv(prog.nMatrixUniform, false,
                 models[i].nMatrix);
+
+			gl.uniform1f(prog.nearUniform, camera.near);
+			gl.uniform1f(prog.farUniform, camera.far);
 			
 			draw(models[i]);
 		}
@@ -420,7 +431,7 @@ let app = ( function() {
 				mat4.ortho(camera.pMatrix, -v, v, -v, v, -10, 10);
 				break;
 			case("perspective"):
-				mat4.perspective(camera.pMatrix, camera.fovy, 1, 0.5, 10);
+				mat4.perspective(camera.pMatrix, camera.fovy, 1, camera.near, camera.far);
 				break;
 		}
 		// Set projection uniform.

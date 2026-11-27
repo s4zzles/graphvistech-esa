@@ -232,9 +232,7 @@ var cylinder = (function() {
         let iLines = 0;
         let iTris = 0;
 
-        // =================================
-        // CYLINDER SIDE
-        // =================================
+        // cylinder side
 
         for(let i = 0, u = -Math.PI; i <= n; i++, u += du) {
 
@@ -293,9 +291,7 @@ var cylinder = (function() {
             }
         }
 
-        // =================================
-        // CAPS
-        // =================================
+        // caps
 
         function createCap(y, normalY, isTop) {
 
@@ -426,9 +422,7 @@ var cone = (function() {
         let iLines = 0;
         let iTris = 0;
 
-        // =================================
-        // CONE SIDE
-        // =================================
+        // cone side
 
         for(let i = 0, u = -Math.PI; i <= n; i++, u += du) {
 
@@ -497,9 +491,7 @@ var cone = (function() {
             }
         }
 
-        // =================================
-        // BOTTOM CAP
-        // =================================
+        // bottom cap
 
         let startIndex = sideVertexCount;
 
